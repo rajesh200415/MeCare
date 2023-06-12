@@ -15,3 +15,24 @@ This repository contains an Angular project that demonstrates the implementation
 ```mark
 git clone https://github.com/your-username/angular-material-login.git
 ```
+2. Navigate to the project directory:
+```mark
+cd angular-material-login
+```
+3. Install the dependencies:
+```mark
+npm install
+```
+4.Start the development server:
+```mark
+ng serve
+```
+5.Open your browser and visit http://localhost:4200 to view the login page.
+
+## Usage
+* Enter your email address in the email field.
+* Enter your password in the password field.
+* Click the "Login" button to submit the form.
+* If the provided credentials are valid, you will be logged in.
+* If the credentials are invalid, an error message will be displayed.
+

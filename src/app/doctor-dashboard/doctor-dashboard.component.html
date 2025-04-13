@@ -1,0 +1,43 @@
+<div class="doctor-dashboard">
+  <h2>Doctor Dashboard - {{ user.name }}</h2>
+  <button (click)="logout()" class="logout-btn">Logout</button>
+
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <h3>Appointments</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Patient Email</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let appointment of appointments">
+        <td>{{ appointment.patientEmail }}</td>
+        <td>{{ appointment.date }}</td>
+        <td>{{ appointment.time }}</td>
+        <td>{{ appointment.status }}</td>
+        <td>
+          <button
+            *ngIf="appointment.status === 'pending'"
+            (click)="approveAppointment(appointment._id)"
+            class="approve-btn"
+          >
+            Approve
+          </button>
+          <button
+            *ngIf="appointment.status === 'pending'"
+            (click)="rejectAppointment(appointment._id)"
+            class="reject-btn"
+          >
+            Reject
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

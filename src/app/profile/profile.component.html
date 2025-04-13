@@ -1,0 +1,92 @@
+<div class="profile-container" [@fadeIn]>
+  <header class="profile-header">
+    <h1>Patient Health Profile</h1>
+    <p>Update your health details to help us provide better care.</p>
+  </header>
+
+  <section class="health-form-section" [@slideIn]="formState">
+    <form [formGroup]="healthForm" (ngSubmit)="onSubmit()" class="health-form">
+      <div class="form-group">
+        <label for="weight">Weight (e.g., 70 kg)</label>
+        <input
+          id="weight"
+          formControlName="weight"
+          placeholder="Enter your weight"
+        />
+        <div
+          class="error"
+          *ngIf="
+            healthForm.get('weight')?.touched &&
+            healthForm.get('weight')?.hasError('required')
+          "
+        >
+          Weight is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="height">Height (e.g., 170 cm)</label>
+        <input
+          id="height"
+          formControlName="height"
+          placeholder="Enter your height"
+        />
+        <div
+          class="error"
+          *ngIf="
+            healthForm.get('height')?.touched &&
+            healthForm.get('height')?.hasError('required')
+          "
+        >
+          Height is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bloodGroup">Blood Group</label>
+        <select id="bloodGroup" formControlName="bloodGroup">
+          <option value="" disabled>Select your blood group</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+        </select>
+        <div
+          class="error"
+          *ngIf="
+            healthForm.get('bloodGroup')?.touched &&
+            healthForm.get('bloodGroup')?.hasError('required')
+          "
+        >
+          Blood group is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="allergies">Allergies (if any)</label>
+        <textarea
+          id="allergies"
+          formControlName="allergies"
+          placeholder="e.g., Peanuts, Pollen"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="medicalHistory">Medical History (if any)</label>
+        <textarea
+          id="medicalHistory"
+          formControlName="medicalHistory"
+          placeholder="e.g., Asthma, Diabetes"
+        ></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="!healthForm.valid">
+        Update Health Details
+      </button>
+    </form>
+  </section>
+</div>

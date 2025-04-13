@@ -1,0 +1,433 @@
+header {
+  background-color: #007bff;
+  color: white;
+  padding: 15px 30px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+header .header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header .logo {
+  display: flex;
+  align-items: center;
+}
+
+header .logo img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+header .logo span {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+header nav ul li {
+  margin: 0 25px;
+}
+
+header nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  transition: color 0.3s;
+}
+
+header nav ul li a:hover {
+  color: #e0e0e0;
+}
+
+header .get-quote-btn {
+  background-color: #0056b3;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+header .get-quote-btn:hover {
+  background-color: #004085;
+}
+
+main {
+  position: relative;
+  min-height: 100vh; /* Ensure the main section takes full height */
+}
+
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background: transparent; /* Ensure no background color interferes */
+}
+
+main .hero-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1; /* Ensure content is above particles */
+}
+
+main .hero-section .hero-content {
+  max-width: 50%;
+  animation: slideIn 1s ease-out;
+}
+
+main .hero-section .hero-content h1 {
+  font-size: 40px;
+  color: #003087;
+  margin-bottom: 20px;
+}
+
+main .hero-section .hero-content p {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+main .hero-section .hero-content .learn-more-btn {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+main .hero-section .hero-content .learn-more-btn:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+main .hero-section .hero-image {
+  position: relative;
+  z-index: 1;
+}
+
+main .hero-section .hero-image img {
+  max-width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  animation: zoomIn 1.5s ease-out;
+}
+
+main .hero-section .hero-image:before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  width: 100%;
+  height: 100%;
+  background: #007bff;
+  border-radius: 50%;
+  z-index: -1;
+  clip-path: circle(50% at 50% 50%);
+  opacity: 0.1;
+}
+
+/* Services Section */
+.services-section {
+  max-width: 1200px;
+  margin: 50px auto;
+  text-align: center;
+  position: relative;
+  z-index: 1; /* Ensure content is above particles */
+}
+
+.services-section h2 {
+  font-size: 32px;
+  color: #003087;
+  margin-bottom: 40px;
+}
+
+.services-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.service-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 20px; /* More rounded corners for a widget-like look */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Deeper shadow for floating effect */
+  width: 30%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+  animation: float 3s ease-in-out infinite; /* Apply floating animation */
+  position: relative; /* Ensure stacking context */
+}
+
+/* Add slight delay to each card's animation for a staggered effect */
+.service-card:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.service-card:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.service-card:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.service-card:hover {
+  transform: translateY(-15px); /* Enhanced hover lift */
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+}
+
+.service-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 15px; /* Slightly rounded image corners */
+  margin-bottom: 15px;
+}
+
+.service-card h3 {
+  font-size: 20px;
+  color: #003087;
+  margin-bottom: 10px;
+}
+
+.service-card p {
+  font-size: 16px;
+  color: #555;
+}
+
+/* Testimonials Section */
+.testimonials-section {
+  max-width: 1200px;
+  margin: 50px auto;
+  text-align: center;
+  background-color: #f5f8fd;
+  padding: 40px;
+  border-radius: 15px;
+  position: relative;
+  z-index: 1; /* Ensure content is above particles */
+}
+
+.testimonials-section h2 {
+  font-size: 32px;
+  color: #003087;
+  margin-bottom: 40px;
+}
+
+.testimonials-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.testimonial-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 45%;
+  animation: fadeIn 1s ease-out;
+}
+
+.testimonial-card .patient-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+}
+
+.testimonial-card p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.testimonial-card h4 {
+  font-size: 18px;
+  color: #003087;
+}
+
+/* Footer Section */
+footer {
+  background-color: #003087;
+  color: white;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1; /* Ensure footer is above particles */
+}
+
+footer .footer-container {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 20px;
+}
+
+footer .footer-section {
+  width: 30%;
+}
+
+footer .footer-section h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+footer .footer-section p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+footer .footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+footer .footer-section ul li {
+  margin-bottom: 10px;
+}
+
+footer .footer-section ul li a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+footer .footer-section ul li a:hover {
+  color: #e0e0e0;
+}
+
+/* Floating Widgets */
+.floating-widgets {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.floating-widgets .chat-bubble,
+.floating-widgets .help-icon {
+  background-color: #007bff;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.floating-widgets .chat-bubble:hover,
+.floating-widgets .help-icon:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+}
+
+.floating-widgets .chat-bubble i,
+.floating-widgets .help-icon i {
+  font-size: 20px;
+}
+
+.floating-widgets .chat-bubble span,
+.floating-widgets .help-icon span {
+  display: none;
+}
+
+.floating-widgets .chat-bubble {
+  animation: float 2s infinite;
+}
+
+.floating-widgets .help-icon {
+  animation: float 2s infinite 1s;
+}
+
+/* Keyframes for animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Gradient Animation Keyframe */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

@@ -1,0 +1,494 @@
+<div class="dashboard-container" [@fadeIn]>
+  <!-- Sidebar -->
+  <div class="sidebar" [@slideInSidebar]="sidebarState">
+    <div class="sidebar-header">
+      <h2>{{ currentVitals.name || "Patient" }}</h2>
+      <p>{{ userEmail || "No email" }}</p>
+    </div>
+    <nav>
+      <ul>
+        <li>
+          <a
+            routerLink="/patient-dashboard"
+            [class.active]="router.isActive('/patient-dashboard', true)"
+            (mouseenter)="updateButtonState('dashboard', 'hovered')"
+            (mouseleave)="updateButtonState('dashboard', 'normal')"
+            [@hover]="buttonStates.get('dashboard') || 'normal'"
+          >
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+        </li>
+        <li>
+          <a
+            routerLink="/appointments"
+            [class.active]="router.isActive('/appointments', true)"
+            (mouseenter)="updateButtonState('appointments', 'hovered')"
+            (mouseleave)="updateButtonState('appointments', 'normal')"
+            [@hover]="buttonStates.get('appointments') || 'normal'"
+          >
+            <i class="fas fa-calendar-check"></i> Appointments
+          </a>
+        </li>
+        <li>
+          <a
+            routerLink="/profile"
+            [class.active]="router.isActive('/profile', true)"
+            (mouseenter)="updateButtonState('profile', 'hovered')"
+            (mouseleave)="updateButtonState('profile', 'normal')"
+            [@hover]="buttonStates.get('profile') || 'normal'"
+          >
+            <i class="fas fa-user"></i> Profile
+          </a>
+        </li>
+        <li>
+          <a
+            (click)="logout()"
+            (mouseenter)="updateButtonState('logout', 'hovered')"
+            (mouseleave)="updateButtonState('logout', 'normal')"
+            [@hover]="buttonStates.get('logout') || 'normal'"
+          >
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>Patient Healthcare Dashboard</h1>
+    <p class="description">
+      Stay on top of your health with real-time insights into your appointments,
+      activity, and wellness metrics.
+    </p>
+
+    <div class="dashboard-grid">
+      <!-- Doctor Appointment Section -->
+      <div class="appointment-section">
+        <h2>Doctor Appointments</h2>
+        <div class="calendar">
+          <h3>March 2025</h3>
+          <div class="calendar-header">
+            <span>Sun</span>
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+          </div>
+          <div class="calendar-body">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span class="appointment-day" title="Dentist Appointment">1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+            <span>5</span>
+            <span>6</span>
+            <span>7</span>
+            <span>8</span>
+            <span>9</span>
+            <span>10</span>
+            <span class="appointment-day" title="Cardiologist Appointment"
+              >11</span
+            >
+            <span>12</span>
+            <span>13</span>
+            <span>14</span>
+            <span>15</span>
+            <span>16</span>
+            <span>17</span>
+            <span>18</span>
+            <span>19</span>
+            <span>20</span>
+            <span>21</span>
+            <span>22</span>
+            <span>23</span>
+            <span>24</span>
+            <span>25</span>
+            <span>26</span>
+            <span>27</span>
+            <span>28</span>
+            <span>29</span>
+            <span class="today appointment-day" title="Physician Appointment"
+              >30</span
+            >
+            <span>31</span>
+          </div>
+        </div>
+        <div class="appointments-list">
+          <div class="appointment">
+            <p><strong>Dentist</strong></p>
+            <p>Dr. Julia Wanton</p>
+            <p>Mar 1, 09:00 - 11:00 AM</p>
+          </div>
+          <div class="appointment">
+            <p><strong>Cardiologist</strong></p>
+            <p>Dr. Julia Wanton</p>
+            <p>Mar 11, 11:00 - 01:00 PM</p>
+          </div>
+          <div class="appointment">
+            <p><strong>Physician</strong></p>
+            <p>Dr. Julia Wanton</p>
+            <p>Mar 30, 01:00 - 06:00 PM</p>
+          </div>
+          <div class="appointment">
+            <p><strong>Endocrinologist</strong></p>
+            <p>Dr. Julia Wanton</p>
+            <p>Apr 5, 03:00 - 06:00 PM</p>
+          </div>
+          <div class="appointment">
+            <p><strong>Orthopedist</strong></p>
+            <p>Dr. Julia Wanton</p>
+            <p>Apr 10, 03:00 - 06:00 PM</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patient Info Section -->
+      <div class="patient-info-section">
+        <div class="patient-image">
+          <img
+            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80"
+            alt="Patient Image"
+          />
+        </div>
+        <div class="patient-details">
+          <div class="detail">
+            <p>42 Years</p>
+            <p>Age</p>
+          </div>
+          <div class="detail">
+            <p>{{ currentVitals.bloodGroup || "N/A" }}</p>
+            <p>Blood Group</p>
+          </div>
+          <div class="detail">
+            <p>{{ currentVitals.height || "N/A" }}</p>
+            <p>Height [M]</p>
+          </div>
+          <div class="detail">
+            <p>{{ currentVitals.weight || "N/A" }}</p>
+            <p>Weight Kg</p>
+          </div>
+        </div>
+        <!-- Weight Trend Visualization -->
+        <div class="weight-trend">
+          <h3>Weight Trend (Last 6 Months)</h3>
+          <div class="trend-chart">
+            <svg viewBox="0 0 200 80" class="mini-line-chart">
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop
+                    offset="0%"
+                    style="stop-color: #1e3a8a; stop-opacity: 1"
+                  />
+                  <stop
+                    offset="100%"
+                    style="stop-color: #5eead4; stop-opacity: 1"
+                  />
+                </linearGradient>
+              </defs>
+              <polyline
+                points="0,70 40,60 80,65 120,50 160,55 200,40"
+                fill="none"
+                stroke="url(#gradient)"
+                stroke-width="2"
+              />
+              <circle
+                cx="0"
+                cy="70"
+                r="3"
+                fill="#1e3a8a"
+                class="data-point"
+                title="Oct: 54 kg"
+              />
+              <circle
+                cx="40"
+                cy="60"
+                r="3"
+                fill="#1e3a8a"
+                class="data-point"
+                title="Nov: 53 kg"
+              />
+              <circle
+                cx="80"
+                cy="65"
+                r="3"
+                fill="#1e3a8a"
+                class="data-point"
+                title="Dec: 53.5 kg"
+              />
+              <circle
+                cx="120"
+                cy="50"
+                r="3"
+                fill="#1e3a8a"
+                class="data-point"
+                title="Jan: 52 kg"
+              />
+              <circle
+                cx="160"
+                cy="55"
+                r="3"
+                fill="#1e3a8a"
+                class="data-point"
+                title="Feb: 52.5 kg"
+              />
+              <circle
+                cx="200"
+                cy="40"
+                r="3"
+                fill="#5eead4"
+                class="data-point"
+                title="Mar: 51 kg"
+              />
+            </svg>
+          </div>
+          <div class="trend-labels">
+            <span>Oct</span>
+            <span>Nov</span>
+            <span>Dec</span>
+            <span>Jan</span>
+            <span>Feb</span>
+            <span>Mar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Your Activity (Yearly) Section -->
+      <div class="yearly-activity-section">
+        <h2>Your Activity</h2>
+        <h3>Yearly Overview</h3>
+        <div class="yearly-chart">
+          <div class="chart-placeholder">
+            <svg viewBox="0 0 300 100" class="line-chart">
+              <polyline
+                points="0,75 25,50 50,75 75,60 100,70 125,65 150,50 175,60 200,40 225,70 250,60 275,50 300,40"
+                fill="none"
+                stroke="#1e3a8a"
+                stroke-width="2"
+              />
+            </svg>
+          </div>
+          <div class="chart-labels">
+            <span>Jan</span>
+            <span>Feb</span>
+            <span>Mar</span>
+            <span>Apr</span>
+            <span>May</span>
+            <span>Jun</span>
+            <span>Jul</span>
+            <span>Aug</span>
+            <span>Sep</span>
+            <span>Oct</span>
+            <span>Nov</span>
+            <span>Dec</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Your Activity (Weekly) Section - Heatmap -->
+      <div class="weekly-activity-section">
+        <h2>Your Activity</h2>
+        <h3>Weekly Heatmap</h3>
+        <div class="heatmap">
+          <div class="heatmap-row">
+            <span class="heatmap-label">Morning</span>
+            <div
+              class="heatmap-cell"
+              style="background-color: #5eead4; opacity: 0.8"
+              title="38% Activity"
+            >
+              38%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #5eead4; opacity: 0.4"
+              title="18% Activity"
+            >
+              18%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #5eead4; opacity: 1"
+              title="72% Activity"
+            >
+              72%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #5eead4; opacity: 0.7"
+              title="55% Activity"
+            >
+              55%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #5eead4; opacity: 0.6"
+              title="42% Activity"
+            >
+              42%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #5eead4; opacity: 0.9"
+              title="65% Activity"
+            >
+              65%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #5eead4; opacity: 0.3"
+              title="20% Activity"
+            >
+              20%
+            </div>
+          </div>
+          <div class="heatmap-row">
+            <span class="heatmap-label">Afternoon</span>
+            <div
+              class="heatmap-cell"
+              style="background-color: #1e3a8a; opacity: 0.5"
+              title="20% Activity"
+            >
+              20%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #1e3a8a; opacity: 0.6"
+              title="30% Activity"
+            >
+              30%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #1e3a8a; opacity: 0.3"
+              title="15% Activity"
+            >
+              15%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #1e3a8a; opacity: 0.4"
+              title="25% Activity"
+            >
+              25%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #1e3a8a; opacity: 0.3"
+              title="20% Activity"
+            >
+              20%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #1e3a8a; opacity: 0.3"
+              title="20% Activity"
+            >
+              20%
+            </div>
+            <div
+              class="heatmap-cell"
+              style="background-color: #1e3a8a; opacity: 0.4"
+              title="25% Activity"
+            >
+              25%
+            </div>
+          </div>
+          <div class="heatmap-days">
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+            <span>Sun</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Metrics Section - Gauges and Step Counter -->
+      <div class="health-metrics-section">
+        <div class="metric">
+          <h3>General Health</h3>
+          <div class="gauge">
+            <svg viewBox="0 0 120 60" class="gauge-chart">
+              <path
+                class="gauge-bg"
+                d="M10 50 A 50 50 0 0 1 110 50"
+                fill="none"
+                stroke="#eee"
+                stroke-width="10"
+              />
+              <path
+                class="gauge-fill"
+                d="M10 50 A 50 50 0 0 1 60 30"
+                fill="none"
+                stroke="#1e3a8a"
+                stroke-width="10"
+              />
+              <text x="60" y="50" class="gauge-text">48%</text>
+            </svg>
+          </div>
+        </div>
+        <div class="metric">
+          <h3>Water Balance</h3>
+          <div class="gauge">
+            <svg viewBox="0 0 120 60" class="gauge-chart">
+              <path
+                class="gauge-bg"
+                d="M10 50 A 50 50 0 0 1 110 50"
+                fill="none"
+                stroke="#eee"
+                stroke-width="10"
+              />
+              <path
+                class="gauge-fill"
+                d="M10 50 A 50 50 0 0 1 85 20"
+                fill="none"
+                stroke="#5eead4"
+                stroke-width="10"
+              />
+              <text x="60" y="50" class="gauge-text">73%</text>
+            </svg>
+          </div>
+        </div>
+        <div class="metric">
+          <h3>Daily Steps</h3>
+          <div class="step-counter">
+            <svg viewBox="0 0 36 36" class="step-chart">
+              <path
+                class="step-bg"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path
+                class="step-fill"
+                stroke-dasharray="65, 100"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <text x="18" y="20.35" class="step-text">6500</text>
+            </svg>
+            <p>Goal: 10,000</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Widgets -->
+  <div class="floating-widgets">
+    <div class="chat-bubble">
+      <i class="fas fa-comment"></i>
+      <span>Chat with Support</span>
+    </div>
+    <div class="help-icon">
+      <i class="fas fa-question-circle"></i>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,202 @@
+<header>
+  <div class="header-container">
+    <div class="logo">
+      <img src="./assets/icon copy.png" alt="MeCare Logo" />
+      <span>MeCare</span>
+    </div>
+    <nav>
+      <ul>
+        <li>
+          <a routerLink="/homepage" [class.active]="isRouteActive('/homepage')"
+            >Home</a
+          >
+        </li>
+        <li>
+          <a routerLink="/about" [class.active]="isRouteActive('/about')"
+            >About Us</a
+          >
+        </li>
+        <li>
+          <a routerLink="/services" [class.active]="isRouteActive('/services')"
+            >Services</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/login-signup"
+            [class.active]="isRouteActive('/login-signup')"
+            >Login/Signup</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/departments"
+            [class.active]="isRouteActive('/departments')"
+            >Departments</a
+          >
+        </li>
+        <li>
+          <a routerLink="/blog" [class.active]="isRouteActive('/blog')">Blog</a>
+        </li>
+      </ul>
+    </nav>
+    <button class="get-quote-btn">Get A Quote <span>></span></button>
+  </div>
+</header>
+
+<div class="login-signup-container">
+  <div class="left-section" *ngIf="!isSignInMode" data-aos="fade-right">
+    <h1>Welcome Back!</h1>
+    <p>Enter your personal details to use all of site features</p>
+    <button class="sign-in-btn" (click)="toggleMode()">SIGN IN</button>
+  </div>
+  <div class="right-section" *ngIf="!isSignInMode" data-aos="fade-left">
+    <h2>Create Account</h2>
+    <div class="social-login">
+      <button class="social-btn"><i class="fab fa-google"></i></button>
+      <button class="social-btn"><i class="fab fa-facebook-f"></i></button>
+      <button class="social-btn"><i class="fab fa-linkedin-in"></i></button>
+    </div>
+    <p class="or-text">or use your email for registration</p>
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="form">
+      <div class="form-group">
+        <input
+          type="text"
+          placeholder="Name"
+          formControlName="name"
+          [class.error]="signupName?.touched && signupName?.invalid"
+        />
+        <div
+          *ngIf="signupName?.touched && signupName?.invalid"
+          class="error-message"
+        >
+          Name is required.
+        </div>
+      </div>
+      <div class="form-group">
+        <input
+          type="email"
+          placeholder="Email"
+          formControlName="email"
+          [class.error]="signupEmail?.touched && signupEmail?.invalid"
+        />
+        <div
+          *ngIf="signupEmail?.touched && signupEmail?.invalid"
+          class="error-message"
+        >
+          <div *ngIf="signupEmail?.errors?.['required']">
+            Email is required.
+          </div>
+          <div *ngIf="signupEmail?.errors?.['email']">
+            Please enter a valid email.
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <input
+          type="password"
+          placeholder="Password"
+          formControlName="password"
+          [class.error]="signupPassword?.touched && signupPassword?.invalid"
+        />
+        <div
+          *ngIf="signupPassword?.touched && signupPassword?.invalid"
+          class="error-message"
+        >
+          <div *ngIf="signupPassword?.errors?.['required']">
+            Password is required.
+          </div>
+          <div *ngIf="signupPassword?.errors?.['minlength']">
+            Password must be at least 6 characters long.
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <select
+          formControlName="role"
+          [class.error]="signupRole?.touched && signupRole?.invalid"
+        >
+          <option value="" disabled>Select Role</option>
+          <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+        </select>
+        <div
+          *ngIf="signupRole?.touched && signupRole?.invalid"
+          class="error-message"
+        >
+          Role is required.
+        </div>
+      </div>
+      <button type="submit" class="sign-up-btn" [disabled]="signupForm.invalid">
+        SIGN UP
+      </button>
+    </form>
+  </div>
+
+  <div class="left-section" *ngIf="isSignInMode" data-aos="fade-right">
+    <h1>Sign In</h1>
+    <p>Welcome back! Please enter your details.</p>
+    <form [formGroup]="signinForm" (ngSubmit)="onSignIn()" class="form">
+      <div class="form-group">
+        <input
+          type="email"
+          placeholder="Email"
+          formControlName="email"
+          [class.error]="signinEmail?.touched && signinEmail?.invalid"
+        />
+        <div
+          *ngIf="signinEmail?.touched && signinEmail?.invalid"
+          class="error-message"
+        >
+          <div *ngIf="signinEmail?.errors?.['required']">
+            Email is required.
+          </div>
+          <div *ngIf="signinEmail?.errors?.['email']">
+            Please enter a valid email.
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <input
+          type="password"
+          placeholder="Password"
+          formControlName="password"
+          [class.error]="signinPassword?.touched && signinPassword?.invalid"
+        />
+        <div
+          *ngIf="signinPassword?.touched && signinPassword?.invalid"
+          class="error-message"
+        >
+          <div *ngIf="signinPassword?.errors?.['required']">
+            Password is required.
+          </div>
+          <div *ngIf="signinPassword?.errors?.['minlength']">
+            Password must be at least 6 characters long.
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <select
+          formControlName="role"
+          [class.error]="signinRole?.touched && signinRole?.invalid"
+        >
+          <option value="" disabled>Select Role</option>
+          <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+        </select>
+        <div
+          *ngIf="signinRole?.touched && signinRole?.invalid"
+          class="error-message"
+        >
+          Role is required.
+        </div>
+      </div>
+      <button type="submit" class="sign-in-btn" [disabled]="signinForm.invalid">
+        SIGN IN
+      </button>
+    </form>
+  </div>
+  <div class="right-section" *ngIf="isSignInMode" data-aos="fade-left">
+    <h2>Create an Account</h2>
+    <p>Don't have an account yet? Sign up to get started!</p>
+    <button class="sign-up-btn" (click)="toggleMode()">SIGN UP</button>
+  </div>
+</div>

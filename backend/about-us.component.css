@@ -1,0 +1,366 @@
+header {
+  background-color: #007bff;
+  color: white;
+  padding: 15px 30px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+header .header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header .logo {
+  display: flex;
+  align-items: center;
+}
+
+header .logo img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+header .logo span {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+header nav ul li {
+  margin: 0 25px;
+}
+
+header nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  transition: color 0.3s;
+}
+
+header nav ul li a:hover {
+  color: #e0e0e0;
+}
+
+header nav ul li a.active {
+  color: #e0e0e0;
+  font-weight: bold;
+}
+
+header .get-quote-btn {
+  background-color: #0056b3;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+header .get-quote-btn:hover {
+  background-color: #004085;
+}
+
+main {
+  position: relative;
+  min-height: 100vh; /* Ensure the main section takes full height */
+}
+
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background: transparent; /* Ensure no background color interferes */
+}
+
+/* About Section */
+.about-section {
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 40px;
+  text-align: center;
+  position: relative;
+  z-index: 1; /* Ensure content is above particles */
+}
+
+.about-section h1 {
+  font-size: 40px;
+  color: #003087;
+  margin-bottom: 20px;
+}
+
+.about-section p {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.mission-vision {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.mission-card,
+.vision-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 45%;
+  animation: fadeIn 1s ease-out;
+}
+
+.mission-card h3,
+.vision-card h3 {
+  font-size: 24px;
+  color: #003087;
+  margin-bottom: 10px;
+}
+
+.mission-card p,
+.vision-card p {
+  font-size: 16px;
+  color: #555;
+}
+
+/* Team Section with Floating Widget Effect */
+.team-section {
+  max-width: 1200px;
+  margin: 50px auto;
+  text-align: center;
+  position: relative;
+  z-index: 1; /* Ensure content is above particles */
+}
+
+.team-section h2 {
+  font-size: 32px;
+  color: #003087;
+  margin-bottom: 40px;
+}
+
+.team-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.team-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 20px; /* Rounded corners for widget-like look */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Deeper shadow for floating effect */
+  width: 30%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+  animation: float 3s ease-in-out infinite; /* Apply floating animation */
+  position: relative; /* Ensure stacking context */
+}
+
+/* Staggered animation for team cards */
+.team-card:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.team-card:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.team-card:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.team-card:hover {
+  transform: translateY(-15px); /* Enhanced hover lift */
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+}
+
+.team-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 15px; /* Slightly rounded image corners */
+  margin-bottom: 15px;
+}
+
+.team-card h3 {
+  font-size: 20px;
+  color: #003087;
+  margin-bottom: 5px;
+}
+
+.team-card p {
+  font-size: 16px;
+  color: #555;
+}
+
+/* Footer Section */
+footer {
+  background-color: #003087;
+  color: white;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1; /* Ensure footer is above particles */
+}
+
+footer .footer-container {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 20px;
+}
+
+footer .footer-section {
+  width: 30%;
+}
+
+footer .footer-section h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+footer .footer-section p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+footer .footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+footer .footer-section ul li {
+  margin-bottom: 10px;
+}
+
+footer .footer-section ul li a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+footer .footer-section ul li a:hover {
+  color: #e0e0e0;
+}
+
+/* Floating Widgets */
+.floating-widgets {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.floating-widgets .chat-bubble,
+.floating-widgets .help-icon {
+  background-color: #007bff;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.floating-widgets .chat-bubble:hover,
+.floating-widgets .help-icon:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+}
+
+.floating-widgets .chat-bubble i,
+.floating-widgets .help-icon i {
+  font-size: 20px;
+}
+
+.floating-widgets .chat-bubble span,
+.floating-widgets .help-icon span {
+  display: none;
+}
+
+.floating-widgets .chat-bubble {
+  animation: float 2s infinite;
+}
+
+.floating-widgets .help-icon {
+  animation: float 2s infinite 1s;
+}
+
+/* Keyframes for animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Gradient Animation Keyframe */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

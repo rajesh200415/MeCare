@@ -1,0 +1,60 @@
+<h2 mat-dialog-title>{{ user._id ? "Edit Patient" : "Add Patient" }}</h2>
+<mat-dialog-content>
+  <div>
+    <mat-form-field appearance="fill">
+      <input
+        matInput
+        placeholder="Name"
+        [(ngModel)]="user.name"
+        required
+      /> </mat-form-field
+    ><br />
+    <mat-form-field appearance="fill">
+      <input
+        matInput
+        placeholder="Email"
+        [(ngModel)]="user.email"
+        required
+      /> </mat-form-field
+    ><br />
+    <mat-form-field appearance="fill">
+      <input
+        matInput
+        type="password"
+        placeholder="Password"
+        [(ngModel)]="user.password"
+        required
+      /> </mat-form-field
+    ><br />
+    <mat-form-field appearance="fill">
+      <mat-select placeholder="Role" [(ngModel)]="user.role" required>
+        <mat-option value="Patient">Patient</mat-option>
+      </mat-select> </mat-form-field
+    ><br />
+    <mat-form-field appearance="fill">
+      <input
+        matInput
+        placeholder="Weight (optional)"
+        [(ngModel)]="user.healthDetails.weight"
+      /> </mat-form-field
+    ><br />
+    <mat-form-field appearance="fill">
+      <input
+        matInput
+        placeholder="Height (optional)"
+        [(ngModel)]="user.healthDetails.height"
+      /> </mat-form-field
+    ><br />
+    <mat-form-field appearance="fill">
+      <input
+        matInput
+        placeholder="Blood Group (optional)"
+        [(ngModel)]="user.healthDetails.bloodGroup"
+      />
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onSave()" cdkFocusInitial>Save</button>
+</mat-dialog-actions>

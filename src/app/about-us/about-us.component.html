@@ -1,0 +1,145 @@
+<header>
+  <div class="header-container">
+    <div class="logo">
+      <img src="assets/logo.png" alt="MeCare Logo" />
+      <span>MeCare</span>
+    </div>
+    <nav>
+      <ul>
+        <li>
+          <a
+            routerLink="/homepage"
+            [class.active]="router.isActive('/homepage', true)"
+            >Home</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/about"
+            [class.active]="router.isActive('/about', true)"
+            >About MeCare</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/services"
+            [class.active]="router.isActive('/services', true)"
+            >Services</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/other"
+            [class.active]="router.isActive('/other', true)"
+            >Other Page</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/departments"
+            [class.active]="router.isActive('/departments', true)"
+            >Departments</a
+          >
+        </li>
+        <li>
+          <a routerLink="/blog" [class.active]="router.isActive('/blog', true)"
+            >Blog</a
+          >
+        </li>
+      </ul>
+    </nav>
+    <button class="get-quote-btn">Get A Quote <span>></span></button>
+  </div>
+</header>
+
+<main>
+  <!-- About Section with Background Image -->
+  <section class="about-section">
+    <h1 data-aos="fade-down">Our Objective</h1>
+    <p data-aos="fade-up">
+      To develop a smart and efficient healthcare and pharmacy management
+      platform that simplifies appointment booking, telehealth consultations,
+      patient record management, and pharmacy operations.
+    </p>
+    <p data-aos="fade-up" data-aos-delay="200">
+      To design a user-friendly and secure system that connects patients,
+      doctors, hospital staff, and pharmacists seamlessly.
+    </p>
+    <div class="mission-vision">
+      <div class="mission-card" data-aos="flip-left">
+        <img src="assets/mission.png" alt="Mission" />
+        <h3>Our Mission</h3>
+        <p>
+          To deliver exceptional healthcare with compassion, innovation, and
+          commitment.
+        </p>
+      </div>
+      <div class="vision-card" data-aos="flip-right">
+        <img src="assets/vision.png" alt="Vision" />
+        <h3>Our Vision</h3>
+        <p>
+          To be a global leader in healthcare, empowering communities with
+          high-quality medical services.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="team-section">
+    <h2 data-aos="zoom-in">Meet Our Team</h2>
+    <div class="team-container">
+      <div class="team-card" data-aos="fade-up" data-aos-delay="100">
+        <img src="assets/team-member1.jpg" alt="Dr. Emily Johnson" />
+        <h3>Dr. Emily Johnson</h3>
+        <p>Chief Medical Officer</p>
+      </div>
+      <div class="team-card" data-aos="fade-up" data-aos-delay="200">
+        <img src="assets/team-member2.jpg" alt="Dr. Michael Brown" />
+        <h3>Dr. Michael Brown</h3>
+        <p>Head of Pediatrics</p>
+      </div>
+      <div class="team-card" data-aos="fade-up" data-aos-delay="300">
+        <img src="assets/team-member3.jpg" alt="Dr. Sarah Davis" />
+        <h3>Dr. Sarah Davis</h3>
+        <p>Cardiology Specialist</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-container">
+    <div class="footer-section">
+      <h3>MeCare</h3>
+      <p>Providing top-quality healthcare services.</p>
+    </div>
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a routerLink="/homepage">Home</a></li>
+        <li><a routerLink="/about">About Us</a></li>
+        <li><a routerLink="/services">Services</a></li>
+        <li><a routerLink="/blog">Blog</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>Contact Us</h3>
+      <p>Email: infomecare.com</p>
+      <p>Phone: +8 12 345 6897</p>
+      <p>Address: 123 Health St, Wellness City</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating Chat Widget -->
+<div class="floating-widgets">
+  <div class="chat-bubble" data-aos="zoom-in">
+    <i class="fas fa-comment"></i>
+    <span>Chat</span>
+  </div>
+  <div class="help-icon" data-aos="zoom-in" data-aos-delay="200">
+    <i class="fas fa-question-circle"></i>
+  </div>
+</div>

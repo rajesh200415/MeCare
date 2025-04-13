@@ -1,0 +1,136 @@
+<header>
+  <div class="header-container">
+    <div class="logo">
+      <img src="./assets/icon copy.png" alt="MeCare Logo" />
+      <span>MeCare</span>
+    </div>
+    <nav>
+      <ul>
+        <li>
+          <a
+            routerLink="/homepage"
+            [class.active]="router.isActive('/homepage', true)"
+            >Home</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/about"
+            [class.active]="router.isActive('/about', true)"
+            >About Us</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/services"
+            [class.active]="router.isActive('/services', true)"
+            >Services</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/other"
+            [class.active]="router.isActive('/other', true)"
+            >Other Page</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/departments"
+            [class.active]="router.isActive('/departments', true)"
+            >Departments</a
+          >
+        </li>
+        <li>
+          <a routerLink="/blog" [class.active]="router.isActive('/blog', true)"
+            >Blog</a
+          >
+        </li>
+      </ul>
+    </nav>
+    <button class="get-quote-btn">Get A Quote <span>></span></button>
+  </div>
+</header>
+
+<main>
+  <!-- Services Section with Grid Layout -->
+  <section class="services-section">
+    <div class="services-header">
+      <h1>Our Core Services</h1>
+      <p>
+        Explore the exceptional services we offer at MeCare, designed to provide
+        you with the best healthcare experience.
+      </p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <img src="./assets/image3.jpeg" alt="Emergency Care" />
+        <h3>Emergency Care</h3>
+        <p>
+          We provide 24/7 emergency care with a dedicated team of professionals
+          to ensure you get the help you need, when you need it.
+        </p>
+      </div>
+      <div class="service-card">
+        <img src="./assets/image4.jpg" alt="Pediatric Care" />
+        <h3>Pediatric Care</h3>
+        <p>
+          Specialized care for children, ensuring their health and well-being
+          with compassionate and expert medical attention.
+        </p>
+      </div>
+      <div class="service-card">
+        <img src="./assets/image5.jpg" alt="Cardiology" />
+        <h3>Cardiology</h3>
+        <p>
+          Advanced heart care services, including diagnostics, treatment, and
+          ongoing support for cardiovascular health.
+        </p>
+      </div>
+      <div class="service-card">
+        <img src="./assets/general-medicine.jpg" alt="General Medicine" />
+        <h3>General Medicine</h3>
+        <p>
+          Comprehensive primary care for all ages, focusing on prevention,
+          diagnosis, and treatment.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer Section -->
+<footer>
+  <div class="footer-container">
+    <div class="footer-section">
+      <h3>MeCare</h3>
+      <p>Providing top-quality healthcare services for all your needs.</p>
+    </div>
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a routerLink="/homepage">Home</a></li>
+        <li><a routerLink="/about">About Us</a></li>
+        <li><a routerLink="/services">Services</a></li>
+        <li><a routerLink="/blog">Blog</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>Contact Us</h3>
+      <p>Email: info@mecare.com</p>
+      <p>Phone: +8 12 345 6897</p>
+      <p>Address: 123 Health St, Wellness City</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating Widgets -->
+<div class="floating-widgets">
+  <div class="chat-bubble">
+    <i class="fas fa-comment"></i>
+    <span>Chat</span>
+  </div>
+  <div class="help-icon">
+    <i class="fas fa-question-circle"></i>
+  </div>
+</div>

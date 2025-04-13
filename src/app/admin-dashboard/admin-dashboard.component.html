@@ -1,0 +1,337 @@
+<div class="admin-dashboard">
+  <header class="header">
+    <h1 class="title">Admin Dashboard</h1>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </header>
+
+  <div class="main-container">
+    <aside class="sidebar">
+      <ul>
+        <li
+          [class.active]="activeSection === 'patients'"
+          (click)="setActiveSection('patients')"
+        >
+          <i class="material-icons">people</i> Manage Patients
+        </li>
+        <li
+          [class.active]="activeSection === 'doctors'"
+          (click)="setActiveSection('doctors')"
+        >
+          <i class="material-icons">local_hospital</i> Manage Doctors
+        </li>
+        <li
+          [class.active]="activeSection === 'appointments'"
+          (click)="setActiveSection('appointments')"
+        >
+          <i class="material-icons">event</i> Appointments Overview
+        </li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+      <div *ngIf="activeSection === 'patients'" class="section">
+        <div class="section-header">
+          <h2>Manage Patients</h2>
+        </div>
+        <form
+          [formGroup]="editForm"
+          (ngSubmit)="updateItem()"
+          *ngIf="selectedItem"
+          class="edit-form"
+        >
+          <div class="form-group">
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Name"
+                formControlName="name"
+                required
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Email"
+                formControlName="email"
+                required
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                type="password"
+                placeholder="Password"
+                formControlName="password"
+                required
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-select placeholder="Role" formControlName="role" required>
+                <mat-option value="Patient">Patient</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Weight (optional)"
+                formControlName="weight"
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Height (optional)"
+                formControlName="height"
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Blood Group (optional)"
+                formControlName="bloodGroup"
+              />
+            </mat-form-field>
+          </div>
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="editForm.invalid"
+            >
+              Update
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="selectedItem = null; editForm.reset()"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let patient of patients" class="table-row">
+                <td>{{ patient.name }}</td>
+                <td>{{ patient.email }}</td>
+                <td>{{ patient.role }}</td>
+                <td>
+                  <button
+                    mat-icon-button
+                    color="accent"
+                    (click)="editItem(patient)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    (click)="deleteItem(patient._id || patient.email)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="activeSection === 'doctors'" class="section">
+        <div class="section-header">
+          <h2>Manage Doctors</h2>
+        </div>
+        <form
+          [formGroup]="editForm"
+          (ngSubmit)="updateItem()"
+          *ngIf="selectedItem"
+          class="edit-form"
+        >
+          <div class="form-group">
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Name"
+                formControlName="name"
+                required
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Specialty"
+                formControlName="specialty"
+                required
+              />
+            </mat-form-field>
+          </div>
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="editForm.invalid"
+            >
+              Update
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="selectedItem = null; editForm.reset()"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Specialty</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let doctor of doctors" class="table-row">
+                <td>{{ doctor.name }}</td>
+                <td>{{ doctor.specialty }}</td>
+                <td>
+                  <button
+                    mat-icon-button
+                    color="accent"
+                    (click)="editItem(doctor)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    (click)="deleteItem(doctor._id)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="activeSection === 'appointments'" class="section">
+        <div class="section-header">
+          <h2>Appointments Overview</h2>
+        </div>
+        <form
+          [formGroup]="editForm"
+          (ngSubmit)="updateItem()"
+          *ngIf="selectedItem"
+          class="edit-form"
+        >
+          <div class="form-group">
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Patient Email"
+                formControlName="patientEmail"
+                required
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                type="date"
+                placeholder="Date"
+                formControlName="date"
+                required
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                type="time"
+                placeholder="Time"
+                formControlName="time"
+                required
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input
+                matInput
+                placeholder="Status"
+                formControlName="status"
+                required
+              />
+            </mat-form-field>
+          </div>
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="editForm.invalid"
+            >
+              Update
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="selectedItem = null; editForm.reset()"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Patient Email</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let appointment of appointments" class="table-row">
+                <td>{{ appointment.patientEmail }}</td>
+                <td>{{ appointment.date }}</td>
+                <td>{{ appointment.time }}</td>
+                <td>{{ appointment.status }}</td>
+                <td>
+                  <button
+                    mat-icon-button
+                    color="accent"
+                    (click)="editItem(appointment)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    (click)="deleteItem(appointment._id)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

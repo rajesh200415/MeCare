@@ -1,157 +1,132 @@
-<div class="appointments-container" [@fadeIn]>
-  <div class="appointments-header">
-    <h1>Manage Your Appointments</h1>
-    <button class="back-button" (click)="goBack()">
-      <i class="fas fa-arrow-left"></i> Back to Dashboard
+<div class="appointments-container mat-typography">
+  <!-- Top right back button -->
+  <div class="top-bar">
+    <button mat-raised-button color="accent" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Back to Dashboard
     </button>
   </div>
 
-  <div class="appointments-content" [@slideIn]>
-    <!-- Book New Appointment Section -->
-    <div class="appointment-form-section">
-      <h2>Book a New Appointment</h2>
-      <div class="form-group">
-        <label for="doctor">Select Doctor:</label>
-        <select
-          id="doctor"
-          [(ngModel)]="selectedDoctor"
-          (ngModelChange)="selectedDoctor = $event"
-          required
-        >
-          <option value="">Choose a Doctor</option>
-          <option *ngFor="let doctor of availableDoctors" [value]="doctor">
-            {{ doctor.name }} ({{ doctor.specialty }}) - Rating:
-            {{ doctor.rating }}/5
-          </option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Availability:</label>
-        <div class="availability-slots" *ngIf="selectedDoctor">
-          <span *ngFor="let slot of selectedDoctor.availability">{{
-            slot
-          }}</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="date">Select Date:</label>
-        <input type="date" id="date" [(ngModel)]="appointmentDate" required />
-      </div>
-      <div class="form-group">
-        <label for="time">Select Time:</label>
-        <input type="time" id="time" [(ngModel)]="appointmentTime" required />
-      </div>
+  <h2 class="section-title">Appointments</h2>
+
+  <!-- Appointment Booking Form -->
+  <mat-card class="appointment-form">
+    <mat-card-title>Book an Appointment</mat-card-title>
+    <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Select Doctor</mat-label>
+        <mat-select formControlName="doctor" required>
+          <mat-option value="" disabled>Select a Doctor</mat-option>
+          <mat-option *ngFor="let doctor of doctors" [value]="doctor._id">
+            {{ doctor.name }} ({{ doctor.specialty }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Appointment Date</mat-label>
+        <input matInput type="date" formControlName="date" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Select Time Slot</mat-label>
+        <mat-select formControlName="time" required>
+          <mat-option value="" disabled>Select a Time Slot</mat-option>
+          <mat-option *ngFor="let slot of timeSlots" [value]="slot">
+            {{ slot }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <button
-        class="book-button"
-        (click)="bookAppointment()"
-        [disabled]="!selectedDoctor || !appointmentDate || !appointmentTime"
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="appointmentForm.invalid"
       >
-        <i class="fas fa-calendar-plus"></i> Book Now
+        Book Appointment
       </button>
-      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-      <div class="calendar-preview">
-        <h3>Calendar Preview</h3>
-        <div class="calendar">
-          <div class="calendar-header">
-            <span>Sun</span>
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
-          </div>
-          <div class="calendar-body">
-            <span
-              *ngFor="
-                let day of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-              "
-            >
-              {{ day }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+    </form>
+  </mat-card>
 
-    <!-- Existing Appointments Section -->
-    <div class="existing-appointments-section">
-      <h2>Your Appointments</h2>
-      <div
-        class="appointments-grid"
-        *ngIf="existingAppointments.length > 0; else noAppointments"
-      >
-        <div
-          class="appointment-card"
-          *ngFor="let appointment of existingAppointments"
-          [@fadeIn]
-        >
-          <h3>{{ appointment.doctorName }}</h3>
-          <p><strong>Date:</strong> {{ appointment.date }}</p>
-          <p><strong>Time:</strong> {{ appointment.time }}</p>
-          <p><strong>Specialty:</strong> {{ appointment.specialty }}</p>
-          <p>
-            <strong>Status:</strong>
-            <span
-              [class]="
-                appointment.status === 'Confirmed'
-                  ? 'status-confirmed'
-                  : 'status-pending'
-              "
-              >{{ appointment.status }}</span
-            >
-          </p>
-          <div class="appointment-actions">
-            <button
-              class="cancel-button"
-              (click)="cancelAppointment(appointment.id)"
-            >
-              <i class="fas fa-times"></i> Cancel
-            </button>
-            <button
-              class="reschedule-button"
-              (click)="rescheduleAppointment(appointment.id)"
-            >
-              <i class="fas fa-calendar-alt"></i> Reschedule
-            </button>
-          </div>
-        </div>
-      </div>
-      <ng-template #noAppointments>
-        <p class="no-appointments">
-          No appointments scheduled yet. Book one now!
-        </p>
-      </ng-template>
-      <div class="past-appointments">
-        <h3>Past Appointments</h3>
-        <div
-          class="past-appointment-card"
-          *ngFor="
-            let past of [
-              {
-                doctorName: 'Dr. Sarah Lee',
-                date: '2025-02-15',
-                time: '15:00-17:00',
-                specialty: 'General Physician',
-                status: 'Completed'
-              }
-            ]
-          "
-        >
-          <h4>{{ past.doctorName }}</h4>
-          <p><strong>Date:</strong> {{ past.date }}</p>
-          <p><strong>Time:</strong> {{ past.time }}</p>
-          <p>
-            <strong>Status:</strong>
-            <span class="status-completed">{{ past.status }}</span>
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Upcoming Appointments -->
+  <h3 class="section-title">Upcoming Appointments</h3>
+  <mat-table
+    [dataSource]="upcomingAppointments"
+    class="mat-elevation-z2"
+    *ngIf="upcomingAppointments.length > 0"
+  >
+    <ng-container matColumnDef="doctor">
+      <mat-header-cell *matHeaderCellDef> Doctor </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        {{ element.doctorId.name }}
+      </mat-cell>
+    </ng-container>
 
-  <!-- Floating Help Widget -->
-  <div class="floating-help">
-    <button class="help-button"><i class="fas fa-question-circle"></i></button>
-  </div>
+    <ng-container matColumnDef="specialty">
+      <mat-header-cell *matHeaderCellDef> Specialty </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        {{ element.doctorId.specialty }}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+      <mat-header-cell *matHeaderCellDef> Date </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.date }} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="time">
+      <mat-header-cell *matHeaderCellDef> Time </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.time }} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef> Status </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.status }} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+  </mat-table>
+  <p *ngIf="upcomingAppointments.length === 0">No upcoming appointments.</p>
+
+  <!-- Past Appointments -->
+  <h3 class="section-title">Past Appointments</h3>
+  <mat-table
+    [dataSource]="pastAppointments"
+    class="mat-elevation-z2"
+    *ngIf="pastAppointments.length > 0"
+  >
+    <ng-container matColumnDef="doctor">
+      <mat-header-cell *matHeaderCellDef> Doctor </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        {{ element.doctorId.name }}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="specialty">
+      <mat-header-cell *matHeaderCellDef> Specialty </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        {{ element.doctorId.specialty }}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+      <mat-header-cell *matHeaderCellDef> Date </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.date }} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="time">
+      <mat-header-cell *matHeaderCellDef> Time </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.time }} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef> Status </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{ element.status }} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+  </mat-table>
+  <p *ngIf="pastAppointments.length === 0">No past appointments.</p>
 </div>

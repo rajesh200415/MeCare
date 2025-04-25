@@ -10,8 +10,13 @@
         <label for="weight">Weight (e.g., 70 kg)</label>
         <input
           id="weight"
+          type="number"
           formControlName="weight"
           placeholder="Enter your weight"
+          [class.error]="
+            healthForm.get('weight')?.touched &&
+            healthForm.get('weight')?.hasError('required')
+          "
         />
         <div
           class="error"
@@ -28,8 +33,13 @@
         <label for="height">Height (e.g., 170 cm)</label>
         <input
           id="height"
+          type="number"
           formControlName="height"
           placeholder="Enter your height"
+          [class.error]="
+            healthForm.get('height')?.touched &&
+            healthForm.get('height')?.hasError('required')
+          "
         />
         <div
           class="error"
@@ -44,7 +54,14 @@
 
       <div class="form-group">
         <label for="bloodGroup">Blood Group</label>
-        <select id="bloodGroup" formControlName="bloodGroup">
+        <select
+          id="bloodGroup"
+          formControlName="bloodGroup"
+          [class.error]="
+            healthForm.get('bloodGroup')?.touched &&
+            healthForm.get('bloodGroup')?.hasError('required')
+          "
+        >
           <option value="" disabled>Select your blood group</option>
           <option value="A+">A+</option>
           <option value="A-">A-</option>
@@ -82,6 +99,56 @@
           formControlName="medicalHistory"
           placeholder="e.g., Asthma, Diabetes"
         ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="activityLevel">Activity Level (%)</label>
+        <input
+          id="activityLevel"
+          type="number"
+          formControlName="activityLevel"
+          placeholder="e.g., 55"
+          [class.error]="
+            healthForm.get('activityLevel')?.touched &&
+            (healthForm.get('activityLevel')?.hasError('min') ||
+              healthForm.get('activityLevel')?.hasError('max'))
+          "
+        />
+        <div
+          class="error"
+          *ngIf="
+            healthForm.get('activityLevel')?.touched &&
+            (healthForm.get('activityLevel')?.hasError('min') ||
+              healthForm.get('activityLevel')?.hasError('max'))
+          "
+        >
+          Activity level must be between 0 and 100.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="waterIntake">Water Intake (%)</label>
+        <input
+          id="waterIntake"
+          type="number"
+          formControlName="waterIntake"
+          placeholder="e.g., 73"
+          [class.error]="
+            healthForm.get('waterIntake')?.touched &&
+            (healthForm.get('waterIntake')?.hasError('min') ||
+              healthForm.get('waterIntake')?.hasError('max'))
+          "
+        />
+        <div
+          class="error"
+          *ngIf="
+            healthForm.get('waterIntake')?.touched &&
+            (healthForm.get('waterIntake')?.hasError('min') ||
+              healthForm.get('waterIntake')?.hasError('max'))
+          "
+        >
+          Water intake must be between 0 and 100.
+        </div>
       </div>
 
       <button type="submit" class="submit-btn" [disabled]="!healthForm.valid">

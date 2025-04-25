@@ -1,0 +1,81 @@
+/* Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+thead {
+  background-color: #1e3a8a;
+  color: white;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+tr {
+  transition: background-color 0.3s;
+}
+
+tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Button Styles */
+.back-btn,
+.view-details-btn {
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.back-btn:hover,
+.view-details-btn:hover {
+  background-color: #5eead4;
+  color: #1e3a8a;
+}
+
+.back-btn {
+  margin-top: 10px;
+  display: block;
+}
+
+.view-details-btn {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  th,
+  td {
+    min-width: 120px;
+  }
+
+  .view-details-btn {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+}

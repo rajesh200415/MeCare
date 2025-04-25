@@ -1,16 +1,36 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+
+interface User {
+  name: string;
+  email: string;
+  role: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'https://your-api-url.com/auth'; // Replace with your actual API URL
+  private currentUser: User | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor() {
+    // Load user from localStorage or session if available
+    const user = localStorage.getItem('currentUser');
+    if (user) {
+      this.currentUser = JSON.parse(user);
+    }
+  }
 
-  login(email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, password });
+  setCurrentUser(user: User): void {
+    this.currentUser = user;
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  }
+
+  getCurrentUser(): User | null {
+    return this.currentUser;
+  }
+
+  logout(): void {
+    this.currentUser = null;
+    localStorage.removeItem('currentUser');
   }
 }

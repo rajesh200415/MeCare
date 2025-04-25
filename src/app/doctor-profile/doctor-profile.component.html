@@ -1,0 +1,80 @@
+<div class="profile-container">
+  <div class="top-bar">
+    <button
+      mat-icon-button
+      color="primary"
+      [routerLink]="['/doctor/dashboard']"
+      aria-label="Back to Dashboard"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+  </div>
+
+  <mat-card>
+    <mat-card-title>Doctor Profile</mat-card-title>
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+      <div class="form-fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" readonly />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Specialty</mat-label>
+          <input
+            matInput
+            formControlName="specialty"
+            placeholder="e.g., Neurologist"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Qualifications</mat-label>
+          <input
+            matInput
+            formControlName="qualifications"
+            placeholder="e.g., MD, PhD"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Experience (years)</mat-label>
+          <input
+            matInput
+            formControlName="experience"
+            type="number"
+            placeholder="e.g., 5"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contact Number</mat-label>
+          <input
+            matInput
+            formControlName="contactNumber"
+            placeholder="e.g., +1234567890"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Bio</mat-label>
+          <textarea
+            matInput
+            formControlName="bio"
+            rows="4"
+            placeholder="Tell us about yourself"
+          ></textarea>
+        </mat-form-field>
+      </div>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="profileForm.invalid"
+      >
+        Save Profile
+      </button>
+    </form>
+  </mat-card>
+</div>

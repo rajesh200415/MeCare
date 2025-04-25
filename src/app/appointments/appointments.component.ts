@@ -1,147 +1,138 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { trigger, transition, style, animate } from '@angular/animations';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-appointments',
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css'],
-  animations: [
-    trigger('fadeIn', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('500ms', style({ opacity: 1 })),
-      ]),
-    ]),
-    trigger('slideIn', [
-      transition(':enter', [
-        style({ transform: 'translateX(-100%)' }),
-        animate('500ms', style({ transform: 'translateX(0)' })),
-      ]),
-    ]),
-  ],
 })
 export class AppointmentsComponent implements OnInit {
-  selectedDoctor: any = null;
-  appointmentDate: string = '';
-  appointmentTime: string = '';
-  errorMessage: string = '';
-  calendarDays: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-  availableDoctors: any[] = [];
-  existingAppointments: any[] = [];
+  appointmentForm: FormGroup;
+  doctors: any[] = [];
+  timeSlots: string[] = [
+    '09:00-09:30',
+    '10:00-10:30',
+    '11:00-11:30',
+    '14:00-14:30',
+    '15:00-15:30',
+  ];
+  upcomingAppointments: any[] = [];
   pastAppointments: any[] = [];
-  patientEmail: string = 'patient@example.com'; // Replace with logged-in user email
+  displayedColumns: string[] = [
+    'doctor',
+    'specialty',
+    'date',
+    'time',
+    'status',
+  ];
 
-  constructor(private router: Router, private http: HttpClient) {}
+  patientEmail: string = localStorage.getItem('userEmail') || '';
+  patientName: string = localStorage.getItem('userName') || '';
 
-  ngOnInit() {
-    console.log('Component initialized');
-    this.loadDoctors();
-    this.loadAppointments();
+  constructor(
+    private http: HttpClient,
+    private fb: FormBuilder,
+    private router: Router
+  ) {
+    this.appointmentForm = this.fb.group({
+      doctor: ['', Validators.required],
+      date: ['', Validators.required],
+      time: ['', Validators.required],
+    });
   }
 
-  loadDoctors() {
+  ngOnInit(): void {
+    console.log('localStorage userEmail:', localStorage.getItem('userEmail'));
+    console.log('localStorage userName:', localStorage.getItem('userName'));
+    console.log('patientEmail:', this.patientEmail);
+    console.log('patientName:', this.patientName);
+
+    if (!this.patientEmail || !this.patientName) {
+      console.error('No logged-in user found. Please log in first.');
+      this.router.navigate(['/login-signup']);
+      return;
+    }
+    this.fetchDoctors();
+    this.fetchAppointments();
+  }
+
+  fetchDoctors(): void {
     this.http.get<any[]>('http://localhost:3000/api/doctors').subscribe(
-      (doctors) => {
-        this.availableDoctors = doctors;
-        console.log('Doctors loaded:', doctors);
+      (data) => {
+        this.doctors = data;
+        console.log('Doctors loaded:', this.doctors);
       },
-      (error) => console.error('Failed to load doctors:', error)
+      (error) => {
+        console.error('Failed to load doctors:', error);
+      }
     );
   }
 
-  loadAppointments() {
+  fetchAppointments(): void {
     this.http
       .get<any[]>(
-        'http://localhost:3000/api/appointments/patient/' + this.patientEmail
+        `http://localhost:3000/api/appointments/patient/${this.patientEmail}`
       )
       .subscribe(
         (appointments) => {
-          this.existingAppointments = appointments.filter((a) =>
-            ['Pending', 'Confirmed'].includes(a.status)
+          const currentDate = new Date();
+          this.upcomingAppointments = appointments.filter(
+            (a) =>
+              new Date(a.date) >= currentDate &&
+              a.status !== 'Canceled' &&
+              a.status !== 'Rejected'
           );
           this.pastAppointments = appointments.filter(
-            (a) => a.status === 'Completed'
+            (a) =>
+              new Date(a.date) < currentDate ||
+              a.status === 'Canceled' ||
+              a.status === 'Rejected'
           );
-          console.log('Appointments loaded:', appointments);
+          console.log('Upcoming:', this.upcomingAppointments);
+          console.log('Past:', this.pastAppointments);
         },
-        (error) => console.error('Failed to load appointments:', error)
+        (error) => {
+          console.error('Failed to load appointments:', error);
+        }
       );
   }
 
-  onDoctorChange() {
-    console.log('Doctor changed to:', this.selectedDoctor);
-    this.appointmentDate = '';
-    this.appointmentTime = '';
-  }
+  onSubmit(): void {
+    if (this.appointmentForm.valid) {
+      const formData = this.appointmentForm.value;
+      const selectedDoctor = this.doctors.find(
+        (d) => d._id === formData.doctor
+      );
 
-  isFormValid(): boolean {
-    return (
-      !!this.selectedDoctor && !!this.appointmentDate && !!this.appointmentTime
-    );
-  }
+      if (selectedDoctor && this.patientEmail && this.patientName) {
+        const newAppointment = {
+          doctorId: selectedDoctor._id,
+          patientEmail: this.patientEmail,
+          patientName: this.patientName,
+          date: formData.date,
+          time: formData.time,
+          status: 'Pending',
+        };
 
-  bookAppointment() {
-    console.log('Booking attempt - Data:', {
-      doctorId: this.selectedDoctor?._id,
-      patientEmail: this.patientEmail,
-      date: this.appointmentDate,
-      time: this.appointmentTime,
-      status: 'Pending',
-    });
-    if (this.isFormValid()) {
-      const appointmentData = {
-        doctorId: this.selectedDoctor._id,
-        patientEmail: this.patientEmail,
-        date: this.appointmentDate,
-        time: this.appointmentTime,
-        status: 'Pending',
-      };
-      this.http
-        .post('http://localhost:3000/api/appointments', appointmentData)
-        .subscribe(
-          (response: any) => {
-            console.log('Appointment booked successfully:', response);
-            this.errorMessage = '';
-            this.selectedDoctor = null;
-            this.appointmentDate = '';
-            this.appointmentTime = '';
-            this.loadAppointments(); // Refresh appointments
-          },
-          (error) => {
-            console.error('Booking error:', error);
-            this.errorMessage =
-              error.error?.message || 'Failed to book appointment';
-            if (error.status === 404) this.errorMessage = 'Doctor not found';
-            else if (error.status === 500)
-              this.errorMessage = 'Server error, please try again';
-          }
-        );
-    } else {
-      this.errorMessage = 'Please fill all fields';
-      console.log('Booking failed - Form invalid');
+        this.http
+          .post('http://localhost:3000/api/appointments', newAppointment)
+          .subscribe(
+            (response) => {
+              console.log('Appointment booked successfully:', response);
+              this.appointmentForm.reset();
+              this.fetchAppointments();
+            },
+            (error) => {
+              console.error('Error booking appointment:', error);
+            }
+          );
+      }
     }
   }
 
-  cancelAppointment(id: string) {
-    console.log('Canceling appointment with id:', id);
-    this.http.delete(`http://localhost:3000/api/appointments/${id}`).subscribe(
-      (response) => {
-        console.log('Appointment canceled:', response);
-        this.loadAppointments();
-      },
-      (error) => console.error('Cancel error:', error)
-    );
-  }
-
-  rescheduleAppointment(id: string) {
-    console.log('Rescheduling appointment with id:', id);
-    alert('Reschedule functionality to be implemented');
-  }
-
-  goBack() {
-    console.log('Navigating back to dashboard');
+  goBack(): void {
     this.router.navigate(['/patient-dashboard']);
   }
 }

@@ -1,0 +1,25 @@
+<table>
+  <thead>
+    <tr>
+      <th *ngFor="let column of displayedColumns">{{ column | titlecase }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let appointment of appointments">
+      <td>{{ appointment.patientEmail }}</td>
+      <td>{{ appointment.patientName }}</td>
+      <td>{{ appointment.date }}</td>
+      <td>{{ appointment.time }}</td>
+      <td>{{ appointment.status }}</td>
+      <td>
+        <button
+          class="view-details-btn"
+          (click)="viewPatientDetails(appointment.patientEmail)"
+        >
+          View Patient Details
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<button class="back-btn" (click)="goBack()">Back to Dashboard</button>

@@ -1,43 +1,142 @@
-<div class="doctor-dashboard">
-  <h2>Doctor Dashboard - {{ user.name }}</h2>
-  <button (click)="logout()" class="logout-btn">Logout</button>
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <button class="sidebar-button active" (click)="navigateTo('dashboard')">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </button>
+    <button class="sidebar-button" (click)="navigateTo('appointments')">
+      <i class="fas fa-calendar-alt"></i> Appointments
+    </button>
+    <button class="sidebar-button" (click)="navigateTo('patients')">
+      <i class="fas fa-users"></i> Patients
+    </button>
+    <button class="sidebar-button" (click)="navigateTo('messages')">
+      <i class="fas fa-envelope"></i> Messages
+    </button>
+    <button class="sidebar-button" (click)="navigateTo('medications')">
+      <i class="fas fa-prescription-bottle"></i> Medications
+    </button>
+    <button class="sidebar-button" (click)="navigateTo('documents')">
+      <i class="fas fa-file-alt"></i> Documents
+    </button>
+    <button class="sidebar-button" (click)="navigateTo('finances')">
+      <i class="fas fa-dollar-sign"></i> Finances
+    </button>
+    <button class="sidebar-button" (click)="navigateTo('settings')">
+      <i class="fas fa-cog"></i> Settings
+    </button>
+    <button class="sidebar-button" (click)="navigateTo('profile')">
+      <i class="fas fa-user-circle"></i> Profile
+    </button>
+    <button class="sidebar-button logout" (click)="logout()">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
 
-  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+    <div class="upgrade-card">
+      <h3>Upgrade to Premium</h3>
+      <p>Unlock all features</p>
+      <button class="upgrade-button">Upgrade</button>
+    </div>
+  </div>
 
-  <h3>Appointments</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Patient Email</th>
-        <th>Date</th>
-        <th>Time</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let appointment of appointments">
-        <td>{{ appointment.patientEmail }}</td>
-        <td>{{ appointment.date }}</td>
-        <td>{{ appointment.time }}</td>
-        <td>{{ appointment.status }}</td>
-        <td>
-          <button
-            *ngIf="appointment.status === 'pending'"
-            (click)="approveAppointment(appointment._id)"
-            class="approve-btn"
-          >
-            Approve
-          </button>
-          <button
-            *ngIf="appointment.status === 'pending'"
-            (click)="rejectAppointment(appointment._id)"
-            class="reject-btn"
-          >
-            Reject
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header">
+      <h1>Dashboard for Dr. {{ doctorName }}</h1>
+      <select [(ngModel)]="selectedYear" (ngModelChange)="fetchDashboardData()">
+        <option value="2019">2019</option>
+        <option value="2020">2020</option>
+      </select>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+      <div class="card">
+        <h3>Important Tasks</h3>
+        <p class="important">{{ dashboardData.importantTasks }}</p>
+        <span class="subtext"
+          >+ {{ dashboardData.highPriorityTasks }} task high priority</span
+        >
+      </div>
+      <div class="card">
+        <h3>New Patients</h3>
+        <p class="new-patients">{{ dashboardData.newPatients }}</p>
+        <span class="subtext"
+          >+ {{ dashboardData.waitingPatients }} patients waiting</span
+        >
+      </div>
+      <div class="card">
+        <h3>Total Patients</h3>
+        <p class="total-patients">{{ dashboardData.totalPatients }}k</p>
+        <span class="subtext"
+          >+ {{ dashboardData.patientIncrease }}% increase</span
+        >
+      </div>
+      <div class="card">
+        <h3>Total Payments</h3>
+        <p class="total-payments">${{ dashboardData.totalPayments }}m</p>
+        <span class="subtext"
+          >+ {{ dashboardData.paymentIncrease }}% increase</span
+        >
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="chart-card activity-chart">
+        <h3>Activity</h3>
+        <canvas id="activityChart"></canvas>
+      </div>
+      <div class="chart-card top-division-chart">
+        <h3>Top Division</h3>
+        <canvas id="topDivisionChart"></canvas>
+      </div>
+    </div>
+
+    <div class="charts-section">
+      <div class="chart-card age-chart">
+        <h3>Age</h3>
+        <canvas id="ageChart"></canvas>
+      </div>
+      <div class="chart-card gender-chart">
+        <h3>Gender</h3>
+        <canvas id="genderChart"></canvas>
+        <div class="chart-center-text">
+          <p>{{ dashboardData.totalPatients }}k</p>
+          <span>Patients this year</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patients Table -->
+    <div class="patients-table">
+      <h3>Patients</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Patient name</th>
+            <th>Age</th>
+            <th>Date of birth</th>
+            <th>Diagnosis</th>
+            <th>Triage</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let patient of dashboardData.patients">
+            <td>{{ patient.id }}</td>
+            <td>{{ patient.name }}</td>
+            <td>{{ patient.age }}</td>
+            <td>{{ patient.dob }}</td>
+            <td>{{ patient.diagnosis }}</td>
+            <td [ngClass]="patient.triage.toLowerCase()">
+              {{ patient.triage }}
+            </td>
+            <td><i class="fas fa-ellipsis-v"></i></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

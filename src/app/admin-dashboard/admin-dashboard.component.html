@@ -1,7 +1,6 @@
 <div class="admin-dashboard">
   <header class="header">
     <h1 class="title">Admin Dashboard</h1>
-    <button class="logout-btn" (click)="logout()">Logout</button>
   </header>
 
   <div class="main-container">
@@ -24,6 +23,9 @@
           (click)="setActiveSection('appointments')"
         >
           <i class="material-icons">event</i> Appointments Overview
+        </li>
+        <li class="logout-item" (click)="logout()">
+          <i class="material-icons">exit_to_app</i> Logout
         </li>
       </ul>
     </aside>
@@ -195,6 +197,36 @@
             </button>
           </div>
         </form>
+        <div *ngIf="selectedProfile" class="profile-section">
+          <h3>Doctor Profile</h3>
+          <p><strong>Name:</strong> {{ selectedProfile.user.name }}</p>
+          <p><strong>Email:</strong> {{ selectedProfile.user.email }}</p>
+          <p>
+            <strong>Specialty:</strong>
+            {{ selectedProfile.doctorDetails.specialty }}
+          </p>
+          <p>
+            <strong>Qualifications:</strong>
+            {{ selectedProfile.doctorDetails.qualifications || "N/A" }}
+          </p>
+          <p>
+            <strong>Experience:</strong>
+            {{ selectedProfile.doctorDetails.experience || "N/A" }}
+          </p>
+          <p>
+            <strong>Contact Number:</strong>
+            {{ selectedProfile.doctorDetails.contactNumber || "N/A" }}
+          </p>
+          <p>
+            <strong>Bio:</strong>
+            {{ selectedProfile.doctorDetails.bio || "N/A" }}
+          </p>
+          <p>
+            <strong>Rating:</strong>
+            {{ selectedProfile.doctorDetails.rating || 0 }}
+          </p>
+          <button mat-stroked-button (click)="closeProfile()">Close</button>
+        </div>
         <div class="table-container">
           <table class="data-table">
             <thead>
@@ -222,6 +254,13 @@
                     (click)="deleteItem(doctor._id)"
                   >
                     <mat-icon>delete</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    (click)="viewDoctorProfile(doctor.email)"
+                  >
+                    <mat-icon>visibility</mat-icon>
                   </button>
                 </td>
               </tr>

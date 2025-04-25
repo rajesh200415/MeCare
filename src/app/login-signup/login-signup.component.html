@@ -58,7 +58,7 @@
       <button class="social-btn"><i class="fab fa-linkedin-in"></i></button>
     </div>
     <p class="or-text">or use your email for registration</p>
-    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="form">
+    <form [formGroup]="signupForm" (ngSubmit)="onSignupSubmit()" class="form">
       <div class="form-group">
         <input
           type="text"
@@ -115,6 +115,7 @@
         <select
           formControlName="role"
           [class.error]="signupRole?.touched && signupRole?.invalid"
+          [value]="roles[0]"
         >
           <option value="" disabled>Select Role</option>
           <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
@@ -126,9 +127,31 @@
           Role is required.
         </div>
       </div>
+      <!-- Add specialty field for doctors -->
+      <div
+        class="form-group"
+        *ngIf="signupForm.get('role')?.value === 'Doctor'"
+      >
+        <select
+          formControlName="specialty"
+          [class.error]="signupSpecialty?.touched && signupSpecialty?.invalid"
+        >
+          <option value="" disabled>Select Specialty</option>
+          <option *ngFor="let specialty of specialties" [value]="specialty">
+            {{ specialty }}
+          </option>
+        </select>
+        <div
+          *ngIf="signupSpecialty?.touched && signupSpecialty?.invalid"
+          class="error-message"
+        >
+          Specialty is required for doctors.
+        </div>
+      </div>
       <button type="submit" class="sign-up-btn" [disabled]="signupForm.invalid">
         SIGN UP
       </button>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
     </form>
   </div>
 
@@ -174,29 +197,22 @@
           </div>
         </div>
       </div>
-      <div class="form-group">
-        <select
-          formControlName="role"
-          [class.error]="signinRole?.touched && signinRole?.invalid"
-        >
-          <option value="" disabled>Select Role</option>
-          <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-        </select>
-        <div
-          *ngIf="signinRole?.touched && signinRole?.invalid"
-          class="error-message"
-        >
-          Role is required.
-        </div>
-      </div>
       <button type="submit" class="sign-in-btn" [disabled]="signinForm.invalid">
         SIGN IN
       </button>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
     </form>
   </div>
   <div class="right-section" *ngIf="isSignInMode" data-aos="fade-left">
     <h2>Create an Account</h2>
     <p>Don't have an account yet? Sign up to get started!</p>
     <button class="sign-up-btn" (click)="toggleMode()">SIGN UP</button>
+  </div>
+  <div
+    *ngIf="errorMessage"
+    class="error-message"
+    style="text-align: center; margin-top: 10px"
+  >
+    {{ errorMessage }}
   </div>
 </div>

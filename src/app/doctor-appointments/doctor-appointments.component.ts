@@ -15,10 +15,9 @@ export class DoctorAppointmentsComponent implements OnInit {
     'date',
     'time',
     'status',
-    'actions', // Added actions column for the button
+    'healthDetails', // New column for health details
   ];
 
-  // Get doctor email from localStorage
   doctorEmail: string = localStorage.getItem('userEmail') || '';
 
   constructor(private http: HttpClient, private router: Router) {}
@@ -41,6 +40,7 @@ export class DoctorAppointmentsComponent implements OnInit {
         (appointments) => {
           this.appointments = appointments;
           console.log('Appointments received:', appointments);
+          console.log('Appointments array length:', appointments.length);
         },
         (error) => {
           console.error('Failed to load appointments:', error);
@@ -50,11 +50,5 @@ export class DoctorAppointmentsComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/doctor-dashboard']);
-  }
-
-  viewPatientDetails(patientEmail: string): void {
-    // Navigate to a patient details page or open a modal
-    console.log('Viewing details for patient:', patientEmail);
-    this.router.navigate(['/doctor/patient-details', patientEmail]);
   }
 }

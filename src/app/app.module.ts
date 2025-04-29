@@ -12,6 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip'; // Added for tooltips
 import { AppRoutingModule } from './app-routing.module';
 
 // Components
@@ -37,6 +38,9 @@ import { DoctorFinancesComponent } from './doctor-finances/doctor-finances.compo
 import { DoctorSettingsComponent } from './doctor-settings/doctor-settings.component';
 import { DoctorProfileComponent } from './doctor-profile/doctor-profile.component';
 import { PharmacistDashboardComponent } from './pharmacist-dashboard/pharmacist-dashboard.component';
+import { ReceptionistDashboardComponent } from './receptionist-dashboard/receptionist-dashboard.component';
+import { PatientDetailsComponent } from './patient-details/patient-details.component';
+import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appointment.component';
 
 @NgModule({
   declarations: [
@@ -62,14 +66,16 @@ import { PharmacistDashboardComponent } from './pharmacist-dashboard/pharmacist-
     DoctorSettingsComponent,
     DoctorProfileComponent,
     PharmacistDashboardComponent,
+    ReceptionistDashboardComponent,
+    PatientDetailsComponent,
+    VirtualAppointmentComponent,
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -79,6 +85,8 @@ import { PharmacistDashboardComponent } from './pharmacist-dashboard/pharmacist-
     MatCardModule,
     MatListModule,
     MatDividerModule,
+    MatTooltipModule, // Added for tooltips in appointments.component.html
+    AppRoutingModule,
   ],
   bootstrap: [AppComponent],
 })

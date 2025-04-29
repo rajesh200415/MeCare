@@ -64,31 +64,63 @@ button:hover:not(:disabled) {
   background-color: #5eead4;
 }
 
+/* Styles for Angular Material Table */
 .appointments-table {
   margin-top: 20px;
 }
 
-table {
+mat-table {
   width: 100%;
-  border-collapse: collapse;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-th,
-td {
+mat-header-cell {
+  background-color: #1e3a8a;
+  color: white;
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+  font-weight: bold;
 }
 
-th {
+mat-cell {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  min-width: 100px;
+}
+
+mat-row:hover {
+  background-color: #f1f5f9;
+}
+
+mat-icon-button {
   background-color: #1e3a8a;
   color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 5px;
+  margin: 0 5px;
+  transition: background-color 0.3s;
 }
 
-tr:hover {
-  background-color: #f1f5f9;
+mat-icon-button[color="accent"] {
+  background-color: #ff6f61;
+}
+
+mat-icon-button:hover:not(:disabled) {
+  background-color: #5eead4;
+}
+
+mat-icon {
+  font-size: 20px;
+}
+
+/* Override default table styles to match your design */
+table {
+  display: none;
 }
 
 p {

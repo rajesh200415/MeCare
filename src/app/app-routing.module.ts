@@ -1,4 +1,3 @@
-// app-routing.module.ts
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomepageComponent } from './homepage/homepage.component';
@@ -19,6 +18,9 @@ import { DoctorFinancesComponent } from './doctor-finances/doctor-finances.compo
 import { DoctorSettingsComponent } from './doctor-settings/doctor-settings.component';
 import { PrescriptionsComponent } from './prescriptions/prescriptions.component';
 import { DoctorProfileComponent } from './doctor-profile/doctor-profile.component';
+import { ReceptionistDashboardComponent } from './receptionist-dashboard/receptionist-dashboard.component';
+import { PatientDetailsComponent } from './patient-details/patient-details.component';
+import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appointment.component'; // Import VirtualAppointmentComponent
 
 const routes: Routes = [
   { path: '', redirectTo: '/homepage', pathMatch: 'full' },
@@ -29,9 +31,11 @@ const routes: Routes = [
   { path: 'departments', component: HomepageComponent },
   { path: 'blog', component: HomepageComponent },
   { path: 'patient-dashboard', component: PatientDashboardComponent },
-  { path: 'profile', component: ProfileComponent }, // Keep this for non-doctor profile (e.g., patient)
+  { path: 'profile', component: ProfileComponent },
   { path: 'appointments', component: AppointmentsComponent },
+  { path: 'virtual-appointment', component: VirtualAppointmentComponent }, // Add this route
   { path: 'admin-dashboard', component: AdminDashboardComponent },
+  { path: 'receptionist-dashboard', component: ReceptionistDashboardComponent },
   {
     path: 'doctor',
     children: [
@@ -44,11 +48,15 @@ const routes: Routes = [
       { path: 'finances', component: DoctorFinancesComponent },
       { path: 'settings', component: DoctorSettingsComponent },
       { path: 'prescriptions', component: PrescriptionsComponent },
-      { path: 'profile', component: DoctorProfileComponent }, // Add doctor profile route
+      { path: 'profile', component: DoctorProfileComponent },
+      {
+        path: 'patient-details/:patientEmail',
+        component: PatientDetailsComponent,
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
-  { path: '**', redirectTo: '/homepage' }, // Wildcard route
+  { path: '**', redirectTo: '/homepage' },
 ];
 
 @NgModule({

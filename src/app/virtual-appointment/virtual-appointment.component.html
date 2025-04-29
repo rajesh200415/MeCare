@@ -1,0 +1,13 @@
+<div class="virtual-appointment-container">
+  <h2>Virtual Appointment</h2>
+  <div *ngIf="appointment">
+    <p><strong>Doctor:</strong> {{ appointment.doctorId.name }}</p>
+    <p><strong>Specialty:</strong> {{ appointment.doctorId.specialty }}</p>
+    <p><strong>Date:</strong> {{ appointment.date }}</p>
+    <p><strong>Time:</strong> {{ appointment.time }}</p>
+    <button mat-raised-button color="primary" (click)="joinMeeting()">
+      Join Meeting
+    </button>
+  </div>
+  <p *ngIf="!appointment">No appointment data available.</p>
+</div>

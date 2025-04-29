@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: {
     type: String,
-    enum: ["Patient", "Admin", "Doctor", "Pharmacist"],
+    enum: ["Patient", "Admin", "Doctor", "Pharmacist", "Receptionist"],
     required: true,
   },
   healthDetails: {
@@ -82,12 +82,15 @@ const appointmentSchema = new mongoose.Schema({
     enum: [
       "Pending",
       "Confirmed",
+      "Queued",
       "Completed",
       "Canceled",
       "Approved",
       "Rejected",
+      "Virtual",
     ],
   },
+  queuePosition: { type: Number, default: 0 },
 });
 const Appointment = mongoose.model("Appointment", appointmentSchema);
 
@@ -136,9 +139,88 @@ const initializeAdminUser = async () => {
   }
 };
 
-mongoose.connection.once("open", () => {
-  initializeAdminUser();
-});
+// Seed Test Data
+const seedTestData = async () => {
+  try {
+    const doctorCount = await Doctor.countDocuments();
+    if (doctorCount === 0) {
+      const doctors = [
+        {
+          name: "Peter",
+          email: "peter@gmail.com",
+          specialty: "General Practitioner",
+        },
+        { name: "Sanjay", email: "sanjay@gmail.com", specialty: "Cardiology" },
+        {
+          name: "Alexander",
+          email: "alexander@gmail.com",
+          specialty: "Dermatology",
+        },
+      ];
+      await Doctor.insertMany(doctors);
+      console.log("Test doctors seeded");
+    }
+
+    const appointmentCount = await Appointment.countDocuments();
+    if (appointmentCount === 0) {
+      const doctors = await Doctor.find();
+      const appointments = [
+        {
+          doctorId: doctors.find((d) => d.email === "peter@gmail.com")._id,
+          patientEmail: "patient@example.com",
+          patientName: "Patient",
+          date: "2025-05-22",
+          time: "10:00-10:30",
+          status: "Pending",
+        },
+        {
+          doctorId: doctors.find((d) => d.email === "sanjay@gmail.com")._id,
+          patientEmail: "patient@example.com",
+          patientName: "Patient",
+          date: "2025-05-25",
+          time: "09:00-09:30",
+          status: "Pending",
+        },
+        {
+          doctorId: doctors.find((d) => d.email === "sanjay@gmail.com")._id,
+          patientEmail: "patient@example.com",
+          patientName: "John Doe",
+          date: "2025-06-26",
+          time: "11:00-11:30",
+          status: "Pending",
+        },
+        {
+          doctorId: doctors.find((d) => d.email === "sanjay@gmail.com")._id,
+          patientEmail: "patient1@example.com",
+          patientName: "Patient One",
+          date: "2025-07-30",
+          time: "09:00-09:30",
+          status: "Pending",
+        },
+        {
+          doctorId: doctors.find((d) => d.email === "alexander@gmail.com")._id,
+          patientEmail: "anwar@gmail.com",
+          patientName: "anwar",
+          date: "2025-05-30",
+          time: "10:00-10:30",
+          status: "Pending",
+        },
+        {
+          doctorId: doctors.find((d) => d.email === "alexander@gmail.com")._id,
+          patientEmail: "rxj@gmail.com",
+          patientName: "rxj",
+          date: "2025-06-15",
+          time: "14:00-14:30",
+          status: "Pending",
+        },
+      ];
+      await Appointment.insertMany(appointments);
+      console.log("Test appointments seeded");
+    }
+  } catch (error) {
+    console.error("Error seeding test data:", error);
+  }
+};
 
 // Authentication Endpoints
 app.post("/user/signup", async (req, res) => {
@@ -190,15 +272,14 @@ app.post("/user/signup", async (req, res) => {
     });
     await user.save();
 
-    // If the user is a Doctor, create a corresponding Doctor entry
     if (role === "Doctor") {
       const existingDoctor = await Doctor.findOne({ email });
       if (!existingDoctor) {
         const doctor = new Doctor({
           name,
           email,
-          specialty: specialty || "General Practitioner", // Use provided specialty or default
-          availability: [], // Default to empty; can be updated later
+          specialty: specialty || "General Practitioner",
+          availability: [],
         });
         await doctor.save();
         console.log(`Doctor entry created for: ${email}`);
@@ -399,7 +480,7 @@ app.get("/api/appointments", async (req, res) => {
   try {
     const appointments = await Appointment.find().populate(
       "doctorId",
-      "name specialty"
+      "name specialty email"
     );
     res.json(appointments);
   } catch (error) {
@@ -412,7 +493,9 @@ app.get("/api/appointments/patient/:email", async (req, res) => {
   try {
     const appointments = await Appointment.find({
       patientEmail: req.params.email,
-    }).populate("doctorId", "name specialty");
+    })
+      .populate("doctorId", "name specialty email")
+      .sort({ date: 1, time: 1 });
     res.json(appointments);
   } catch (error) {
     console.error("Fetch patient appointments error:", error);
@@ -440,10 +523,33 @@ app.get("/api/appointments/doctor/:email", async (req, res) => {
     console.log("Found doctor record:", doctorDoc.name);
     const appointments = await Appointment.find({
       doctorId: doctorDoc._id,
-    }).populate("doctorId", "name specialty");
+    }).populate("doctorId", "name specialty email");
 
-    console.log("Appointments found:", appointments);
-    res.json(appointments);
+    // Fetch patient details for all appointments
+    const patientEmails = appointments.map(
+      (appointment) => appointment.patientEmail
+    );
+    const patients = await User.find({
+      email: { $in: patientEmails },
+      role: "Patient",
+    }).select("-password");
+
+    // Merge patient details into appointments
+    const appointmentsWithPatients = appointments.map((appointment) => {
+      const patient = patients.find(
+        (p) => p.email === appointment.patientEmail
+      );
+      return {
+        ...appointment.toObject(),
+        patientDetails: patient || { error: "Patient details not found" },
+      };
+    });
+
+    console.log(
+      "Appointments with patient details found:",
+      appointmentsWithPatients
+    );
+    res.json(appointmentsWithPatients);
   } catch (error) {
     console.error("Fetch doctor appointments error:", error);
     res.status(500).json({ message: "Failed to load appointments", error });
@@ -454,20 +560,42 @@ app.post("/api/appointments", async (req, res) => {
   try {
     const { doctorId, patientEmail, patientName, date, time, status } =
       req.body;
+
+    // Validate doctor existence
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+
+    // Check for existing appointments for the same doctor, date, and time
+    const existingAppointments = await Appointment.find({
+      doctorId,
+      date,
+      time,
+    }).sort({ queuePosition: 1 });
+
+    // Calculate queue position (0 for first, 1 for second, etc.)
+    const queuePosition = existingAppointments.length;
+
+    // Create new appointment with appropriate status
     const appointment = new Appointment({
       doctorId,
       patientEmail,
       patientName,
       date,
       time,
-      status,
+      status: queuePosition === 0 ? "Confirmed" : "Queued",
+      queuePosition,
     });
+
     await appointment.save();
-    res
-      .status(201)
-      .json({ message: "Appointment booked successfully", appointment });
+
+    // Populate doctor details for the response
+    await appointment.populate("doctorId", "name specialty email");
+
+    res.status(201).json({
+      message: "Appointment booked successfully",
+      appointment,
+      queuePosition,
+    });
   } catch (error) {
     console.error("Create appointment error:", error);
     res.status(500).json({ message: "Failed to book appointment", error });
@@ -550,12 +678,87 @@ app.put("/api/appointments/:id/reject", async (req, res) => {
   }
 });
 
+app.put("/api/appointments/confirm/:id", async (req, res) => {
+  try {
+    console.log(`Confirming appointment with ID: ${req.params.id}`);
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { status: "Completed" },
+      { new: true }
+    );
+    if (!appointment) {
+      console.log(`Appointment not found for ID: ${req.params.id}`);
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+    console.log(`Appointment confirmed:`, appointment);
+    res.json({ message: "Appointment confirmed", appointment });
+  } catch (error) {
+    console.error("Confirm appointment error:", error);
+    res.status(500).json({ message: "Failed to confirm appointment", error });
+  }
+});
+
+app.put("/api/appointments/cancel/:id", async (req, res) => {
+  try {
+    console.log(`Canceling appointment with ID: ${req.params.id}`);
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { status: "Canceled" },
+      { new: true }
+    );
+    if (!appointment) {
+      console.log(`Appointment not found for ID: ${req.params.id}`);
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+    console.log(`Appointment canceled:`, appointment);
+    res.json({ message: "Appointment canceled", appointment });
+  } catch (error) {
+    console.error("Cancel appointment error:", error);
+    res.status(500).json({ message: "Failed to cancel appointment", error });
+  }
+});
+
+app.put("/api/appointments/:id/virtual", async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    // Update status to indicate it's a virtual appointment
+    appointment.status = "Virtual";
+    await appointment.save();
+
+    // Optionally, reassign queue positions for remaining appointments in the same slot
+    const remainingAppointments = await Appointment.find({
+      doctorId: appointment.doctorId,
+      date: appointment.date,
+      time: appointment.time,
+      _id: { $ne: appointment._id },
+      status: "Queued",
+    }).sort({ queuePosition: 1 });
+
+    // Reassign queue positions
+    for (let i = 0; i < remainingAppointments.length; i++) {
+      remainingAppointments[i].queuePosition = i + 1;
+      await remainingAppointments[i].save();
+    }
+
+    res.json({ message: "Appointment set to virtual", appointment });
+  } catch (error) {
+    console.error("Set virtual appointment error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to set virtual appointment", error });
+  }
+});
+
 // Prescription Endpoints
 app.get("/api/prescriptions/doctor/:email", async (req, res) => {
   try {
     const doctor = await Doctor.findOne({ email: req.params.email });
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
-    const prescriptions = await Appointment.find({
+    const prescriptions = await Prescription.find({
       doctorId: doctor._id,
     }).populate("doctorId", "name specialty");
     res.json(prescriptions);
@@ -789,8 +992,8 @@ app.get("/api/doctor-dashboard/:email/:year", async (req, res) => {
     ).length;
     const highPriorityTasks = Math.floor(importantTasks * 0.3);
     const waitingPatients = appointments.filter(
-      (a) => a.status === "Pending"
-    ).length;
+      (a) => a.status === "Queued"
+    ).length; // Updated to reflect queued patients
     const patientIncrease = 120;
     const totalPayments = 64;
     const paymentIncrease = 24;
@@ -888,4 +1091,9 @@ app.get("/api/doctor-dashboard/:email/:year", async (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+mongoose.connection.once("open", () => {
+  initializeAdminUser();
+  seedTestData();
 });

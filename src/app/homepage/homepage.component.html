@@ -4,14 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MeCare - Healthcare Services</title>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="homepage.component.css" />
-    <!-- Assuming Font Awesome is used for icons -->
+
+    <!-- Font Awesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
+
+    <!-- AOS Animation Library -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
   </head>
+
   <body>
+    <!-- Header -->
     <header>
       <div class="header-container">
         <div class="logo">
@@ -68,7 +76,9 @@
       </div>
     </header>
 
+    <!-- Main Content -->
     <main>
+      <!-- Hero Section -->
       <section class="hero-section">
         <div class="hero-content animate-fade-in">
           <h1>Get Better Care For Your Health</h1>
@@ -84,10 +94,11 @@
         </div>
       </section>
 
-      <section class="services-section" #servicesSection>
-        <h2>Our Services</h2>
+      <!-- Services Section -->
+      <section class="services-section" id="servicesSection">
+        <h2 data-aos="fade-up">Our Services</h2>
         <div class="services-container">
-          <div class="service-card animate-slide-up">
+          <div class="service-card" data-aos="fade-up" data-aos-delay="100">
             <img src="./assets/image3.jpeg" alt="Emergency Care" />
             <h3>Emergency Care</h3>
             <p>
@@ -96,10 +107,7 @@
               it.
             </p>
           </div>
-          <div
-            class="service-card animate-slide-up"
-            style="animation-delay: 0.2s"
-          >
+          <div class="service-card" data-aos="fade-up" data-aos-delay="300">
             <img src="./assets/image4.jpg" alt="Pediatric Care" />
             <h3>Pediatric Care</h3>
             <p>
@@ -107,10 +115,7 @@
               well-being with compassionate and expert medical attention.
             </p>
           </div>
-          <div
-            class="service-card animate-slide-up"
-            style="animation-delay: 0.4s"
-          >
+          <div class="service-card" data-aos="fade-up" data-aos-delay="500">
             <img src="./assets/image5.jpg" alt="Cardiology" />
             <h3>Cardiology</h3>
             <p>
@@ -121,10 +126,11 @@
         </div>
       </section>
 
-      <section class="testimonials-section">
-        <h2>What Our Patients Say</h2>
+      <!-- Testimonials Section -->
+      <section class="testimonials-section" id="testimonials">
+        <h2 data-aos="fade-up">What Our Patients Say</h2>
         <div class="testimonials-container">
-          <div class="testimonial-card">
+          <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="200">
             <img
               src="./assets/image6.webp"
               alt="Patient 1"
@@ -136,7 +142,7 @@
             </p>
             <h4>John Doe</h4>
           </div>
-          <div class="testimonial-card">
+          <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="400">
             <img
               src="./assets/image7.avif"
               alt="Patient 2"
@@ -152,6 +158,7 @@
       </section>
     </main>
 
+    <!-- Footer -->
     <footer>
       <div class="footer-container">
         <div class="footer-section">
@@ -170,13 +177,14 @@
         </div>
         <div class="footer-section">
           <h3>Contact Us</h3>
-          <p>Email: infoemail.com</p>
+          <p>Email: info@mecare.com</p>
           <p>Phone: +8 12 345 6897</p>
           <p>Address: 123 Health St, Wellness City</p>
         </div>
       </div>
     </footer>
 
+    <!-- Floating Widgets -->
     <div class="floating-widgets">
       <div class="chat-bubble animate-bounce">
         <i class="fas fa-comment"></i>
@@ -186,5 +194,15 @@
         <i class="fas fa-question-circle"></i>
       </div>
     </div>
+
+    <!-- AOS Script -->
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 1000,
+        once: true,
+        easing: "ease-in-out",
+      });
+    </script>
   </body>
 </html>

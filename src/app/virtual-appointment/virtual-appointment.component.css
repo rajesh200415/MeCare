@@ -1,0 +1,26 @@
+.virtual-appointment-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: #1e3a8a;
+  margin-bottom: 15px;
+}
+
+p {
+  margin: 10px 0;
+}
+
+button {
+  background-color: #1e3a8a;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #5eead4;
+}

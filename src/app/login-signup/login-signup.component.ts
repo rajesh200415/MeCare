@@ -3,6 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+// Custom validator for password with at least 1 special character and 1 number
+function passwordValidator(control: any) {
+  const value = control.value || '';
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+  const hasNumber = /\d/.test(value);
+  return hasSpecialChar && hasNumber ? null : { invalidPassword: true };
+}
+
 @Component({
   selector: 'app-login-signup',
   templateUrl: './login-signup.component.html',
@@ -10,17 +18,18 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class LoginSignupComponent {
   isSignInMode = false;
-  roles = ['Patient', 'Doctor', 'Pharmacist', 'Admin'];
+  roles = ['Patient', 'Doctor', 'Pharmacist', 'Admin', 'Receptionist'];
   specialties = [
     'General Practitioner',
     'Internal Medicine',
     'Cardiology',
     'Dermatology',
     'Pediatrics',
-  ]; // List of specialties for doctors
+  ];
   signupForm: FormGroup;
   signinForm: FormGroup;
   errorMessage: string = '';
+  passwordStrength: string = ''; // To store and display password strength
 
   constructor(
     private fb: FormBuilder,
@@ -28,13 +37,15 @@ export class LoginSignupComponent {
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {
-    // Initialize signup form with all fields
     this.signupForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: [
+        '',
+        [Validators.required, Validators.minLength(6), passwordValidator],
+      ],
       role: ['Patient', Validators.required],
-      specialty: [''], // Optional field for doctors
+      specialty: [''],
       healthDetails: this.fb.group({
         weight: [''],
         height: [''],
@@ -42,13 +53,16 @@ export class LoginSignupComponent {
       }),
     });
 
-    // Initialize signin form
     this.signinForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    // Add conditional validation for specialty
+    // Subscribe to password changes to evaluate strength
+    this.signupForm.get('password')?.valueChanges.subscribe((password) => {
+      this.updatePasswordStrength(password);
+    });
+
     this.signupForm.get('role')?.valueChanges.subscribe((role) => {
       const specialtyControl = this.signupForm.get('specialty');
       if (role === 'Doctor') {
@@ -60,6 +74,41 @@ export class LoginSignupComponent {
     });
   }
 
+  // Method to evaluate and update password strength
+  updatePasswordStrength(password: string) {
+    if (!password) {
+      this.passwordStrength = '';
+      return;
+    }
+
+    const length = password.length;
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasUpperCase = /[A-Z]/.test(password);
+    let strength = 0;
+
+    if (length >= 6) strength += 1;
+    if (hasNumber) strength += 1;
+    if (hasSpecialChar) strength += 1;
+    if (hasUpperCase) strength += 1;
+
+    switch (strength) {
+      case 1:
+      case 2:
+        this.passwordStrength = 'Weak';
+        break;
+      case 3:
+        this.passwordStrength = 'Medium';
+        break;
+      case 4:
+        this.passwordStrength = 'Strong';
+        break;
+      default:
+        this.passwordStrength = 'Very Weak';
+    }
+    this.cdr.detectChanges(); // Ensure UI updates
+  }
+
   isRouteActive(route: string): boolean {
     return this.router.isActive(route, true);
   }
@@ -67,6 +116,7 @@ export class LoginSignupComponent {
   toggleMode() {
     this.isSignInMode = !this.isSignInMode;
     this.errorMessage = '';
+    this.passwordStrength = ''; // Reset password strength when toggling
   }
 
   onSignupSubmit() {
@@ -170,6 +220,8 @@ export class LoginSignupComponent {
             route = '/patient-dashboard';
           } else if (role === 'Pharmacist') {
             route = '/pharmacist-dashboard';
+          } else if (role === 'Receptionist') {
+            route = '/receptionist-dashboard';
           }
 
           console.log('Attempting navigation to:', route);
@@ -198,7 +250,6 @@ export class LoginSignupComponent {
     );
   }
 
-  // Form control getters for validation
   get signupName() {
     return this.signupForm.get('name');
   }
@@ -218,6 +269,6 @@ export class LoginSignupComponent {
     return this.signinForm.get('email');
   }
   get signinPassword() {
-    return this.signinForm.get('password');
+    return this.signinForm.get('signinPassword');
   }
 }

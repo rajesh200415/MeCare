@@ -1,0 +1,64 @@
+<div class="receptionist-dashboard">
+  <!-- Back Button -->
+  <!-- Inside receptionist-dashboard.component.html -->
+  <div style="position: fixed; bottom: 20px; right: 20px">
+    <button (click)="goBack()">🔙 Back to Home</button>
+  </div>
+
+  <h1>Receptionist Dashboard</h1>
+  <button class="logout-btn" (click)="logout()">Logout</button>
+
+  <h2>Appointments</h2>
+
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+
+  <!-- Optional test button for verifying click -->
+  <button (click)="onAction('confirm', { _id: 'test123' })">
+    Test Action Button
+  </button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Patient Email</th>
+        <th>Patient Name</th>
+        <th>Doctor Email</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let appointment of appointments">
+        <td>{{ appointment._id }}</td>
+        <td>{{ appointment.patientEmail }}</td>
+        <td>{{ appointment.patientName }}</td>
+        <td>{{ appointment.doctorId?.email }}</td>
+        <td>{{ appointment.date }}</td>
+        <td>{{ appointment.time }}</td>
+        <td>{{ appointment.status }}</td>
+        <td>
+          <button
+            class="action-btn confirm-btn"
+            (click)="onAction('confirm', appointment)"
+            [disabled]="appointment.status !== 'Pending'"
+            title="Confirm Appointment"
+          >
+            ✅
+          </button>
+          <button
+            class="action-btn cancel-btn"
+            (click)="onAction('cancel', appointment)"
+            [disabled]="appointment.status !== 'Pending'"
+            title="Cancel Appointment"
+          >
+            ❌
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

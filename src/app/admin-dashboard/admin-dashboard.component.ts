@@ -85,7 +85,7 @@ export class AdminDashboardComponent implements OnInit {
     );
     this.http.get<any[]>('http://localhost:3000/api/appointments').subscribe(
       (data) => {
-        this.appointments = data;
+        this.appointments = data; // Admin sees all appointments, including canceled
         console.log('Appointments fetched:', data);
       },
       (error) => {
@@ -228,6 +228,48 @@ export class AdminDashboardComponent implements OnInit {
         console.error('Delete error:', error);
       }
     );
+  }
+
+  // New methods for appointment management
+  confirmAppointment(appointmentId: string) {
+    console.log('Confirming appointment:', appointmentId);
+    this.http
+      .put(
+        `http://localhost:3000/api/appointments/confirm/${appointmentId}`,
+        {}
+      )
+      .subscribe(
+        () => {
+          this.fetchOverview();
+          this.errorMessage = 'Appointment confirmed successfully';
+          console.log('Appointment confirmed:', appointmentId);
+        },
+        (error) => {
+          this.errorMessage = `Error confirming appointment: ${
+            error.message || error.statusText
+          }`;
+          console.error('Confirm error:', error);
+        }
+      );
+  }
+
+  cancelAppointment(appointmentId: string) {
+    console.log('Canceling appointment:', appointmentId);
+    this.http
+      .put(`http://localhost:3000/api/appointments/cancel/${appointmentId}`, {})
+      .subscribe(
+        () => {
+          this.fetchOverview();
+          this.errorMessage = 'Appointment canceled successfully';
+          console.log('Appointment canceled:', appointmentId);
+        },
+        (error) => {
+          this.errorMessage = `Error canceling appointment: ${
+            error.message || error.statusText
+          }`;
+          console.error('Cancel error:', error);
+        }
+      );
   }
 
   logout() {

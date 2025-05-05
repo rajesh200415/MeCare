@@ -13,6 +13,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatRadioModule } from '@angular/material/radio'; // Add this import
 import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
@@ -41,6 +42,7 @@ import { ReceptionistDashboardComponent } from './receptionist-dashboard/recepti
 import { PatientDetailsComponent } from './patient-details/patient-details.component';
 import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appointment.component';
 import { FeedbackComponent } from './feedback/feedback.component';
+import { DoctorPrescriptionsComponent } from './doctor-prescriptions/doctor-prescriptions.component';
 
 @NgModule({
   declarations: [
@@ -70,6 +72,7 @@ import { FeedbackComponent } from './feedback/feedback.component';
     PatientDetailsComponent,
     VirtualAppointmentComponent,
     FeedbackComponent,
+    DoctorPrescriptionsComponent,
   ],
   imports: [
     BrowserModule,
@@ -87,6 +90,7 @@ import { FeedbackComponent } from './feedback/feedback.component';
     MatListModule,
     MatDividerModule,
     MatTooltipModule,
+    MatRadioModule, // Add this
     AppRoutingModule,
   ],
   bootstrap: [AppComponent],

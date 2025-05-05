@@ -22,6 +22,7 @@ import { ReceptionistDashboardComponent } from './receptionist-dashboard/recepti
 import { PatientDetailsComponent } from './patient-details/patient-details.component';
 import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appointment.component';
 import { FeedbackComponent } from './feedback/feedback.component';
+import { DoctorPrescriptionsComponent } from './doctor-prescriptions/doctor-prescriptions.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/homepage', pathMatch: 'full' },
@@ -38,7 +39,7 @@ const routes: Routes = [
   { path: 'admin-dashboard', component: AdminDashboardComponent },
   { path: 'receptionist-dashboard', component: ReceptionistDashboardComponent },
   { path: 'feedback', component: FeedbackComponent },
-  { path: 'prescriptions', component: PrescriptionsComponent }, // New route for patient prescriptions
+  { path: 'prescriptions', component: PrescriptionsComponent },
   { path: 'doctor/dashboard', component: DoctorDashboardComponent },
   { path: 'doctor/appointments', component: DoctorAppointmentsComponent },
   { path: 'doctor/patients', component: DoctorPatientsComponent },
@@ -47,7 +48,7 @@ const routes: Routes = [
   { path: 'doctor/documents', component: DoctorDocumentsComponent },
   { path: 'doctor/finances', component: DoctorFinancesComponent },
   { path: 'doctor/settings', component: DoctorSettingsComponent },
-  { path: 'doctor/prescriptions', component: PrescriptionsComponent },
+  { path: 'doctor/prescriptions', component: DoctorPrescriptionsComponent }, // Updated to DoctorPrescriptionsComponent
   { path: 'doctor/profile', component: DoctorProfileComponent },
   {
     path: 'doctor/patient-details/:patientEmail',

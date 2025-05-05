@@ -8,12 +8,32 @@ h3 {
   color: #1f2937;
 }
 
+mat-list-item {
+  color: #4b5563;
+}
+
 mat-form-field {
   width: 100%;
 }
 
 button {
   transition: background-color 0.3s ease;
+}
+
+button[color="primary"] {
+  background-color: #3b82f6;
+}
+
+button[color="primary"]:hover {
+  background-color: #2563eb;
+}
+
+button[color="warn"] {
+  background-color: #ef4444;
+}
+
+button[color="warn"]:hover {
+  background-color: #dc2626;
 }
 
 button[color="accent"] {
@@ -47,13 +67,4 @@ button[disabled] {
 
 .text-red-700 {
   color: #b91c1c;
-}
-
-mat-radio-group {
-  display: flex;
-  gap: 10px;
-}
-
-mat-radio-button {
-  margin-right: 10px;
 }

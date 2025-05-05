@@ -6,7 +6,13 @@
     </button>
   </div>
   <div class="prescriptions-content">
-    <table *ngIf="prescriptions.length > 0; else noPrescriptions">
+    <div *ngIf="isLoading" class="loading">
+      <i class="fas fa-spinner fa-spin"></i> Loading prescriptions...
+    </div>
+    <div *ngIf="errorMessage && !isLoading" class="error">
+      {{ errorMessage }}
+    </div>
+    <table *ngIf="prescriptions.length > 0 && !isLoading; else noPrescriptions">
       <thead>
         <tr>
           <th>Doctor</th>
@@ -32,7 +38,7 @@
       </tbody>
     </table>
     <ng-template #noPrescriptions>
-      <p>No prescriptions found.</p>
+      <p *ngIf="!isLoading">No prescriptions found.</p>
     </ng-template>
   </div>
 </div>

@@ -1,20 +1,19 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {
-  Router,
-  NavigationStart,
-  NavigationEnd,
-  NavigationCancel,
-  NavigationError,
-} from '@angular/router';
-import { Chart, registerables } from 'chart.js';
+import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import Chart from 'chart.js/auto';
+import { io, Socket } from 'socket.io-client';
 
 @Component({
   selector: 'app-doctor-dashboard',
   templateUrl: './doctor-dashboard.component.html',
   styleUrls: ['./doctor-dashboard.component.css'],
 })
-export class DoctorDashboardComponent implements OnInit, AfterViewInit {
+export class DoctorDashboardComponent implements OnInit, OnDestroy {
+  doctorName: string = localStorage.getItem('userName') || 'Doctor';
+  userEmail: string = localStorage.getItem('userEmail') || '';
+  doctorId: string = '';
   selectedYear: string = '2020';
   dashboardData: any = {
     importantTasks: 0,
@@ -26,61 +25,84 @@ export class DoctorDashboardComponent implements OnInit, AfterViewInit {
     totalPayments: 0,
     paymentIncrease: 0,
     activityData: [],
-    divisionData: [],
     ageData: [],
-    genderData: [],
     patients: [],
   };
-  userEmail: string;
-  doctorName: string = 'Unknown Doctor';
-  private activityChart: Chart | undefined;
-  private ageChart: Chart | undefined;
+  showPrescriptionForm: boolean = false;
+  selectedPatient: any = null;
+  prescriptionForm: FormGroup;
+  errorMessage: string = '';
+  activityChart: any;
+  ageChart: any;
+  private socket: Socket;
 
-  constructor(private http: HttpClient, private router: Router) {
-    Chart.register(...registerables);
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.userEmail = user.email || '';
-    this.doctorName = user.name || 'Unknown Doctor';
-    if (!this.userEmail) {
-      console.warn('No user email found, redirecting to login');
-      this.router.navigate(['/login-signup']);
-    }
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private fb: FormBuilder
+  ) {
+    // Initialize WebSocket connection
+    this.socket = io('http://localhost:3000', {
+      withCredentials: true,
+      extraHeaders: {
+        'my-custom-header': 'abcd',
+      },
+    });
 
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        console.log('NavigationStart:', event.url, 'ID:', event.id);
-      } else if (event instanceof NavigationEnd) {
-        console.log('NavigationEnd:', event.url, 'ID:', event.id);
-      } else if (event instanceof NavigationCancel) {
-        console.log(
-          'NavigationCancel:',
-          event.url,
-          'Reason:',
-          event.reason,
-          'ID:',
-          event.id
-        );
-      } else if (event instanceof NavigationError) {
-        console.error(
-          'NavigationError:',
-          event.url,
-          'Error:',
-          event.error,
-          'ID:',
-          event.id
-        );
-      }
+    // Initialize the prescription form
+    this.prescriptionForm = this.fb.group({
+      medications: this.fb.array([
+        this.fb.group({
+          name: ['', Validators.required],
+          dosage: ['', Validators.required],
+          frequency: ['', Validators.required],
+          duration: ['', Validators.required],
+        }),
+      ]),
+      notes: [''],
     });
   }
 
   ngOnInit() {
-    if (this.userEmail) {
-      this.fetchDashboardData();
+    if (!this.userEmail) {
+      this.router.navigate(['/login-signup']);
+      return;
     }
+    this.fetchDoctorInfo();
+    this.fetchDashboardData();
+    this.setupSocketListeners();
   }
 
-  ngAfterViewInit() {
-    setTimeout(() => this.initCharts(), 100);
+  ngOnDestroy() {
+    this.socket.disconnect();
+  }
+
+  setupSocketListeners() {
+    this.socket.emit('joinDoctorRoom', this.userEmail);
+    console.log('Joined doctor room:', this.userEmail);
+
+    this.socket.on('newAppointment', (data: any) => {
+      console.log('Received new appointment update:', data);
+      this.dashboardData.newPatients = data.newPatients;
+      this.dashboardData.waitingPatients = data.waitingPatients;
+      this.dashboardData.patients = data.patients;
+      this.dashboardData.totalPatients = data.patients.length / 1000;
+    });
+  }
+
+  fetchDoctorInfo() {
+    this.http
+      .get<any>(`http://localhost:3000/api/doctor/details/${this.userEmail}`)
+      .subscribe(
+        (data) => {
+          this.doctorId = data.doctorDetails._id;
+          console.log('Fetched doctor ID:', this.doctorId);
+        },
+        (error) => {
+          console.error('Error fetching doctor info:', error);
+          this.errorMessage = 'Failed to load doctor info.';
+        }
+      );
   }
 
   fetchDashboardData() {
@@ -90,38 +112,20 @@ export class DoctorDashboardComponent implements OnInit, AfterViewInit {
       )
       .subscribe(
         (data) => {
-          this.dashboardData = {
-            importantTasks: data.importantTasks || 0,
-            highPriorityTasks: data.highPriorityTasks || 0,
-            newPatients: data.newPatients || 0,
-            waitingPatients: data.waitingPatients || 0,
-            totalPatients: data.totalPatients || 0,
-            patientIncrease: data.patientIncrease || 0,
-            totalPayments: data.totalPayments || 0,
-            paymentIncrease: data.paymentIncrease || 0,
-            activityData: data.activityData || [],
-            divisionData: data.divisionData || [],
-            ageData: data.ageData || [],
-            genderData: data.genderData || [],
-            patients: data.patients || [],
-          };
-          this.updateCharts();
+          this.dashboardData = data;
+          this.initializeCharts();
         },
         (error) => {
           console.error('Error fetching dashboard data:', error);
-          this.updateCharts();
+          this.errorMessage = 'Failed to fetch dashboard data.';
         }
       );
   }
 
-  initCharts() {
+  initializeCharts() {
     const activityCtx = document.getElementById(
       'activityChart'
     ) as HTMLCanvasElement;
-    if (!activityCtx) {
-      console.error('Activity chart canvas not found');
-      return;
-    }
     this.activityChart = new Chart(activityCtx, {
       type: 'line',
       data: {
@@ -129,109 +133,139 @@ export class DoctorDashboardComponent implements OnInit, AfterViewInit {
         datasets: [
           {
             label: 'This Year',
-            data: this.dashboardData.activityData.map((d: any) => d.thisYear),
-            borderColor: '#4e73df',
-            fill: false,
-          },
-          {
-            label: 'Previous Year',
-            data: this.dashboardData.activityData.map(
-              (d: any) => d.previousYear
-            ),
-            borderColor: '#e3e6f0',
+            data: this.dashboardData.activityData.map((d: any) => d.value),
+            borderColor: '#007bff',
             fill: false,
           },
         ],
       },
       options: {
         responsive: true,
-        plugins: { legend: { position: 'top' } },
         scales: {
-          y: { beginAtZero: true, max: 250 },
+          y: {
+            beginAtZero: true,
+          },
         },
       },
     });
 
     const ageCtx = document.getElementById('ageChart') as HTMLCanvasElement;
-    if (!ageCtx) {
-      console.error('Age chart canvas not found');
-      return;
-    }
     this.ageChart = new Chart(ageCtx, {
       type: 'bar',
       data: {
-        labels: this.dashboardData.ageData.map((d: any) => d.range),
+        labels: ['0-18', '19-30', '31-50', '51+'],
         datasets: [
           {
-            label: 'Patients',
-            data: this.dashboardData.ageData.map((d: any) => d.value),
-            backgroundColor: ['#1cc88a', '#4e73df', '#f6c23e', '#e74a3b'],
+            label: 'Age Distribution',
+            data: [
+              this.dashboardData.ageData.filter((age: number) => age <= 18)
+                .length,
+              this.dashboardData.ageData.filter(
+                (age: number) => age > 18 && age <= 30
+              ).length,
+              this.dashboardData.ageData.filter(
+                (age: number) => age > 30 && age <= 50
+              ).length,
+              this.dashboardData.ageData.filter((age: number) => age > 50)
+                .length,
+            ],
+            backgroundColor: '#007bff',
           },
         ],
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
         scales: {
-          y: { beginAtZero: true, max: 2500 },
+          y: {
+            beginAtZero: true,
+          },
         },
       },
     });
   }
 
-  updateCharts() {
-    if (this.activityChart) {
-      this.activityChart.data.labels = this.dashboardData.activityData.map(
-        (d: any) => d.month
-      );
-      this.activityChart.data.datasets[0].data =
-        this.dashboardData.activityData.map((d: any) => d.thisYear);
-      this.activityChart.data.datasets[1].data =
-        this.dashboardData.activityData.map((d: any) => d.previousYear);
-      this.activityChart.update();
-    }
-    if (this.ageChart) {
-      this.ageChart.data.labels = this.dashboardData.ageData.map(
-        (d: any) => d.range
-      );
-      this.ageChart.data.datasets[0].data = this.dashboardData.ageData.map(
-        (d: any) => d.value
-      );
-      this.ageChart.update();
-    }
-  }
-
-  isActive(section: string): boolean {
-    const currentUrl = this.router.url;
-    const expectedUrl = `/doctor/${section}`;
-    console.log(
-      `Checking if active: currentUrl=${currentUrl}, expectedUrl=${expectedUrl}`
-    );
-    return currentUrl === expectedUrl;
+  isActive(route: string): boolean {
+    return this.router.url.includes(route);
   }
 
   logout() {
-    console.log('Logging out');
-    localStorage.removeItem('user');
-    this.router.navigate(['/login-signup']).then(
-      (success) => {
-        console.log(
-          'Navigation successful:',
-          success,
-          'Target URL:',
-          '/login-signup',
-          'Current URL:',
-          this.router.url
-        );
-      },
-      (error) => {
-        console.error(
-          'Navigation failed:',
-          error,
-          'Target URL:',
-          '/login-signup'
-        );
-      }
+    localStorage.clear();
+    this.router.navigate(['/login-signup']);
+  }
+
+  // Prescription Form Logic
+  get medications(): FormArray {
+    return this.prescriptionForm.get('medications') as FormArray;
+  }
+
+  addMedication() {
+    this.medications.push(
+      this.fb.group({
+        name: ['', Validators.required],
+        dosage: ['', Validators.required],
+        frequency: ['', Validators.required],
+        duration: ['', Validators.required],
+      })
     );
+  }
+
+  removeMedication(index: number) {
+    this.medications.removeAt(index);
+  }
+
+  openPrescriptionForm(patient: any) {
+    this.selectedPatient = patient;
+    this.showPrescriptionForm = true;
+    this.errorMessage = '';
+  }
+
+  closePrescriptionForm() {
+    this.showPrescriptionForm = false;
+    this.selectedPatient = null;
+    this.prescriptionForm.reset();
+    this.medications.clear();
+    this.addMedication();
+  }
+
+  createPrescription() {
+    if (this.prescriptionForm.invalid) {
+      this.errorMessage = 'Please fill out all required fields.';
+      return;
+    }
+
+    const prescriptionData = {
+      doctorId: this.doctorId,
+      patientEmail: this.selectedPatient.email,
+      medications: this.prescriptionForm.value.medications,
+      notes: this.prescriptionForm.value.notes,
+    };
+
+    this.http
+      .post('http://localhost:3000/api/prescriptions', prescriptionData)
+      .subscribe(
+        (response: any) => {
+          console.log('Prescription created:', response);
+          this.sendPrescription(response.prescription._id);
+        },
+        (error) => {
+          console.error('Error creating prescription:', error);
+          this.errorMessage = 'Failed to create prescription.';
+        }
+      );
+  }
+
+  sendPrescription(prescriptionId: string) {
+    this.http
+      .put(`http://localhost:3000/api/prescriptions/send/${prescriptionId}`, {})
+      .subscribe(
+        (response) => {
+          console.log('Prescription sent:', response);
+          this.closePrescriptionForm();
+        },
+        (error) => {
+          console.error('Error sending prescription:', error);
+          this.errorMessage = 'Failed to send prescription.';
+        }
+      );
   }
 }

@@ -1,0 +1,144 @@
+<mat-card class="container mx-auto p-4 max-w-3xl">
+  <mat-card-title class="text-2xl font-bold mb-4"
+    >Prescribe Medicines</mat-card-title
+  >
+
+  <!-- Patient Selection -->
+  <mat-card-content>
+    <div class="mb-4">
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Select Patient</mat-label>
+        <mat-select
+          [(ngModel)]="selectedPatientEmail"
+          (selectionChange)="loadPatientDetails()"
+        >
+          <mat-option value="" disabled>Select a patient</mat-option>
+          <mat-option *ngFor="let patient of patients" [value]="patient.email">
+            {{ patient.name }} ({{ patient.email }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Patient Details (if selected) -->
+    <div *ngIf="selectedPatientEmail" class="mb-4 p-4 border rounded">
+      <h3 class="text-lg font-semibold">Patient Details</h3>
+      <mat-list>
+        <mat-list-item
+          ><strong>Name:</strong> {{ selectedPatient?.name }}</mat-list-item
+        >
+        <mat-list-item
+          ><strong>Email:</strong> {{ selectedPatient?.email }}</mat-list-item
+        >
+        <mat-list-item>
+          <strong>Medical Conditions:</strong>
+          {{
+            selectedPatient?.healthDetails?.medicalConditions?.join(", ") ||
+              "None"
+          }}
+        </mat-list-item>
+        <mat-list-item>
+          <strong>Allergies:</strong>
+          {{ selectedPatient?.healthDetails?.allergies?.join(", ") || "None" }}
+        </mat-list-item>
+      </mat-list>
+    </div>
+
+    <!-- Prescription Form -->
+    <div *ngIf="selectedPatientEmail" class="mb-4">
+      <h3 class="text-lg font-semibold mb-2">Add Prescription</h3>
+      <div
+        *ngFor="let med of medications; let i = index"
+        class="mb-2 p-4 border rounded"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="fill">
+            <mat-label>Medicine Name</mat-label>
+            <input
+              matInput
+              [(ngModel)]="med.name"
+              placeholder="e.g., Paracetamol"
+              required
+            />
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Dosage</mat-label>
+            <input
+              matInput
+              [(ngModel)]="med.dosage"
+              placeholder="e.g., 500mg"
+              required
+            />
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Frequency</mat-label>
+            <input
+              matInput
+              [(ngModel)]="med.frequency"
+              placeholder="e.g., Twice daily"
+              required
+            />
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Duration</mat-label>
+            <input
+              matInput
+              [(ngModel)]="med.duration"
+              placeholder="e.g., 5 days"
+              required
+            />
+          </mat-form-field>
+        </div>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="removeMedication(i)"
+          class="mt-2"
+        >
+          <mat-icon>delete</mat-icon> Remove
+        </button>
+      </div>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="addMedication()"
+        class="mb-4"
+      >
+        <mat-icon>add</mat-icon> Add Medicine
+      </button>
+      <div>
+        <mat-form-field appearance="fill" class="w-full">
+          <mat-label>Additional Notes</mat-label>
+          <textarea
+            matInput
+            [(ngModel)]="notes"
+            placeholder="e.g., Take after meals"
+            rows="4"
+          ></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Submit Prescription -->
+    <div *ngIf="selectedPatientEmail" class="text-center">
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="prescribeMedicines()"
+        [disabled]="isPrescribeButtonDisabled()"
+        matTooltip="Fill all medicine details to enable"
+      >
+        Prescribe Medicines
+      </button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div
+      *ngIf="message"
+      class="mt-4 p-4 rounded text-center"
+      [ngClass]="getMessageClasses()"
+    >
+      {{ message }}
+    </div>
+  </mat-card-content>
+</mat-card>

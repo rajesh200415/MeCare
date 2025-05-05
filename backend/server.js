@@ -2,9 +2,27 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
+const http = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
-app.use(cors({ origin: "http://localhost:4200" }));
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:4200",
+    methods: ["GET", "POST"],
+  },
+});
+
+app.use(
+  cors({
+    origin: "http://localhost:4200",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+app.options("*", cors());
 app.use(express.json());
 
 mongoose
@@ -117,7 +135,7 @@ const prescriptionSchema = new mongoose.Schema({
 });
 const Prescription = mongoose.model("Prescription", prescriptionSchema);
 
-// Feedback Schema
+// Updated Feedback Schema
 const feedbackSchema = new mongoose.Schema({
   appointmentId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -130,13 +148,30 @@ const feedbackSchema = new mongoose.Schema({
     required: true,
   },
   patientEmail: { type: String, required: true },
-  communication: { type: String, required: true },
-  concernsAddressed: { type: String, required: true },
-  recommendation: { type: String, required: true },
-  rating: { type: Number, required: true, min: 1, max: 5 },
+  communication: { type: Number, required: true, min: 1, max: 5 },
+  professionalism: { type: Number, required: true, min: 1, max: 5 },
+  knowledge: { type: Number, required: true, min: 1, max: 5 },
+  empathy: { type: Number, required: true, min: 1, max: 5 },
+  overallSatisfaction: { type: Number, required: true, min: 1, max: 5 },
+  comments: { type: String, default: "" },
+  rating: { type: Number, required: true, min: 1, max: 5 }, // Average of the 5 ratings
   date: { type: Date, default: Date.now },
 });
 const Feedback = mongoose.model("Feedback", feedbackSchema);
+
+// Socket.IO connection
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  socket.on("joinDoctorRoom", (doctorEmail) => {
+    socket.join(doctorEmail);
+    console.log(`Socket ${socket.id} joined room: ${doctorEmail}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+  });
+});
 
 // Initialize Admin User
 const initializeAdminUser = async () => {
@@ -228,7 +263,7 @@ const seedTestData = async () => {
       patientName: patient.name,
       date: "2025-05-01",
       time: "10:00",
-      status: "Confirmed",
+      status: "Completed",
       queuePosition: 0,
     });
     await appointment.save();
@@ -239,17 +274,20 @@ const seedTestData = async () => {
       appointmentId: appointment._id,
       doctorId: doctor._id,
       patientEmail: patient.email,
-      communication: "Excellent",
-      concernsAddressed: "Very well",
-      recommendation: "Highly recommend",
-      rating: 5,
+      communication: 5,
+      professionalism: 4,
+      knowledge: 5,
+      empathy: 4,
+      overallSatisfaction: 5,
+      comments: "Dr. Suriya was very attentive and knowledgeable.",
+      rating: 4.6, // (5 + 4 + 5 + 4 + 5) / 5
       date: new Date(),
     });
     await feedback.save();
     console.log("Seeded test feedback:", feedback);
 
     // Update doctor's rating
-    doctor.rating = 5; // Since there's only one feedback
+    doctor.rating = 4.6; // Based on the seeded feedback
     await doctor.save();
 
     // Seed a test prescription
@@ -265,7 +303,7 @@ const seedTestData = async () => {
         },
       ],
       notes: "Take after meals",
-      status: "Sent", // Changed to "Sent" so patient can see it
+      status: "Sent",
     });
     await prescription.save();
     console.log("Seeded test prescription:", prescription);
@@ -703,7 +741,41 @@ app.post("/api/appointments", async (req, res) => {
 
     await appointment.save();
 
-    await appointment.populate("doctorId", "name specialty email");
+    await appointment.populate("doctorId", "name specialty");
+
+    // Emit real-time update to the doctor's dashboard
+    const appointments = await Appointment.find({
+      doctorId: doctor._id,
+    }).populate("doctorId", "name specialty");
+    const patients = await User.find({
+      email: { $in: appointments.map((a) => a.patientEmail) },
+      role: "Patient",
+    }).select("-password");
+
+    const appointmentData = appointments.map((appointment, index) => ({
+      id: `A${(index + 1).toString().padStart(4, "0")}`,
+      patientEmail: appointment.patientEmail,
+      patientName: appointment.patientName,
+      date: appointment.date,
+      time: appointment.time,
+      status: appointment.status,
+    }));
+
+    io.to(doctor.email).emit("newAppointment", {
+      newPatients: patients.length,
+      waitingPatients: appointments.filter((a) => a.status === "Queued").length,
+      patients: patients.map((patient, index) => ({
+        id: index + 1,
+        name: patient.name,
+        email: patient.email,
+        age: patient.healthDetails?.age || "N/A",
+        gender: patient.healthDetails?.gender || "N/A",
+        status:
+          appointmentData.find((a) => a.patientEmail === patient.email)
+            ?.status || "N/A",
+      })),
+      totalPatients: (patients.length / 1000).toFixed(3),
+    });
 
     res.status(201).json({
       message: "Appointment booked successfully",
@@ -897,8 +969,11 @@ app.post("/api/feedback", async (req, res) => {
       doctorId,
       patientEmail,
       communication,
-      concernsAddressed,
-      recommendation,
+      professionalism,
+      knowledge,
+      empathy,
+      overallSatisfaction,
+      comments,
       rating,
     } = req.body;
 
@@ -941,9 +1016,12 @@ app.post("/api/feedback", async (req, res) => {
       doctorId,
       patientEmail,
       communication,
-      concernsAddressed,
-      recommendation,
-      rating,
+      professionalism,
+      knowledge,
+      empathy,
+      overallSatisfaction,
+      comments: comments || "",
+      rating, // Average rating computed in frontend
       date: new Date(),
     });
     await feedback.save();
@@ -1035,6 +1113,20 @@ app.get("/api/admin/feedback/doctor/:doctorEmail", async (req, res) => {
   }
 });
 
+// Endpoint to fetch feedback by patient email (used to prevent duplicate feedback)
+app.get("/api/feedback/patient/:email", async (req, res) => {
+  try {
+    const feedbacks = await Feedback.find({ patientEmail: req.params.email })
+      .populate("appointmentId", "date time")
+      .populate("doctorId", "name specialty")
+      .sort({ date: -1 });
+    res.json(feedbacks);
+  } catch (error) {
+    console.error("Fetch patient feedback error:", error);
+    res.status(500).json({ message: "Failed to load feedback", error });
+  }
+});
+
 // Prescription Endpoints
 app.get("/api/prescriptions/doctor/:email", async (req, res) => {
   try {
@@ -1054,7 +1146,7 @@ app.get("/api/prescriptions/patient/:email", async (req, res) => {
   try {
     const prescriptions = await Prescription.find({
       patientEmail: req.params.email,
-      status: "Sent", // Only return prescriptions that have been sent
+      status: "Sent",
     }).populate("doctorId", "name specialty");
     res.json(prescriptions);
   } catch (error) {
@@ -1426,7 +1518,7 @@ app.get("/api/doctor-dashboard/:email/:year", async (req, res) => {
 });
 
 const PORT = 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

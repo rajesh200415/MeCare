@@ -11,6 +11,8 @@ export class PrescriptionsComponent implements OnInit {
   userRole: string = localStorage.getItem('userRole') || '';
   userEmail: string = localStorage.getItem('userEmail') || '';
   prescriptions: any[] = [];
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -40,6 +42,9 @@ export class PrescriptionsComponent implements OnInit {
   }
 
   fetchPatientPrescriptions() {
+    this.isLoading = true;
+    this.errorMessage = '';
+    console.log('Fetching prescriptions for email:', this.userEmail);
     this.http
       .get<any[]>(
         `http://localhost:3000/api/prescriptions/patient/${this.userEmail}`
@@ -48,15 +53,26 @@ export class PrescriptionsComponent implements OnInit {
         (data) => {
           console.log('Fetched patient prescriptions:', data);
           this.prescriptions = data;
+          this.isLoading = false;
+          if (data.length === 0) {
+            console.warn('No prescriptions found for this user.');
+          }
         },
         (error) => {
           console.error('Error fetching patient prescriptions:', error);
+          this.errorMessage =
+            'Failed to load prescriptions: ' +
+            (error.message || 'Unknown error');
           this.prescriptions = [];
+          this.isLoading = false;
         }
       );
   }
 
   fetchDoctorPrescriptions() {
+    this.isLoading = true;
+    this.errorMessage = '';
+    console.log('Fetching doctor prescriptions for email:', this.userEmail);
     this.http
       .get<any[]>(
         `http://localhost:3000/api/prescriptions/doctor/${this.userEmail}`
@@ -65,10 +81,15 @@ export class PrescriptionsComponent implements OnInit {
         (data) => {
           console.log('Fetched doctor prescriptions:', data);
           this.prescriptions = data;
+          this.isLoading = false;
         },
         (error) => {
           console.error('Error fetching doctor prescriptions:', error);
+          this.errorMessage =
+            'Failed to load prescriptions: ' +
+            (error.message || 'Unknown error');
           this.prescriptions = [];
+          this.isLoading = false;
         }
       );
   }

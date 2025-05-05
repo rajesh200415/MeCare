@@ -32,13 +32,37 @@
         </li>
         <li>
           <a
+            routerLink="/prescriptions"
+            [class.active]="isRouteActive('/prescriptions')"
+            (click)="logNavigation('prescriptions')"
+            (mouseenter)="updateButtonState('prescriptions', 'hovered')"
+            (mouseleave)="updateButtonState('prescriptions', 'normal')"
+            [@hover]="buttonStates.get('prescriptions') || 'normal'"
+          >
+            <i class="fas fa-prescription-bottle"></i> Prescriptions
+          </a>
+        </li>
+        <li>
+          <a
             routerLink="/profile"
             [class.active]="isRouteActive('/profile')"
             (mouseenter)="updateButtonState('profile', 'hovered')"
-            (mouseleave)="updateButtonState('dashboard', 'normal')"
+            (mouseleave)="updateButtonState('profile', 'normal')"
             [@hover]="buttonStates.get('profile') || 'normal'"
           >
             <i class="fas fa-user"></i> Profile
+          </a>
+        </li>
+        <li>
+          <a
+            routerLink="/feedback"
+            [class.active]="isRouteActive('/feedback')"
+            (click)="logNavigation('feedback')"
+            (mouseenter)="updateButtonState('feedback', 'hovered')"
+            (mouseleave)="updateButtonState('feedback', 'normal')"
+            [@hover]="buttonStates.get('feedback') || 'normal'"
+          >
+            <i class="fas fa-star"></i> Feedback
           </a>
         </li>
         <li>

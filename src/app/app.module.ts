@@ -12,10 +12,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatTooltipModule } from '@angular/material/tooltip'; // Added for tooltips
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AppRoutingModule } from './app-routing.module';
 
-// Components
 import { AppComponent } from './app.component';
 import { LoginSignupComponent } from './login-signup/login-signup.component';
 import { HomepageComponent } from './homepage/homepage.component';
@@ -41,6 +40,7 @@ import { PharmacistDashboardComponent } from './pharmacist-dashboard/pharmacist-
 import { ReceptionistDashboardComponent } from './receptionist-dashboard/receptionist-dashboard.component';
 import { PatientDetailsComponent } from './patient-details/patient-details.component';
 import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appointment.component';
+import { FeedbackComponent } from './feedback/feedback.component';
 
 @NgModule({
   declarations: [
@@ -69,6 +69,7 @@ import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appoi
     ReceptionistDashboardComponent,
     PatientDetailsComponent,
     VirtualAppointmentComponent,
+    FeedbackComponent,
   ],
   imports: [
     BrowserModule,
@@ -85,7 +86,7 @@ import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appoi
     MatCardModule,
     MatListModule,
     MatDividerModule,
-    MatTooltipModule, // Added for tooltips in appointments.component.html
+    MatTooltipModule,
     AppRoutingModule,
   ],
   bootstrap: [AppComponent],

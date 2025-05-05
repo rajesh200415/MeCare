@@ -1,1 +1,38 @@
-<p>prescriptions works!</p>
+<div class="prescriptions-container">
+  <div class="header">
+    <h1>Prescriptions</h1>
+    <button class="back-button" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+  </div>
+  <div class="prescriptions-content">
+    <table *ngIf="prescriptions.length > 0; else noPrescriptions">
+      <thead>
+        <tr>
+          <th>Doctor</th>
+          <th>Medications</th>
+          <th>Notes</th>
+          <th>Date Prescribed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let prescription of prescriptions">
+          <td>{{ prescription.doctorId?.name || "Unknown Doctor" }}</td>
+          <td>
+            <ul>
+              <li *ngFor="let med of prescription.medications">
+                {{ med.name }} - {{ med.dosage }} ({{ med.frequency }}) for
+                {{ med.duration }}
+              </li>
+            </ul>
+          </td>
+          <td>{{ prescription.notes || "N/A" }}</td>
+          <td>{{ prescription.datePrescribed | date : "medium" }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noPrescriptions>
+      <p>No prescriptions found.</p>
+    </ng-template>
+  </div>
+</div>

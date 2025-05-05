@@ -84,10 +84,12 @@ const appointmentSchema = new mongoose.Schema({
       "Confirmed",
       "Queued",
       "Completed",
+      "Finished",
       "Canceled",
       "Approved",
       "Rejected",
       "Virtual",
+      "Present",
     ],
   },
   queuePosition: { type: Number, default: 0 },
@@ -111,8 +113,30 @@ const prescriptionSchema = new mongoose.Schema({
   ],
   datePrescribed: { type: Date, default: Date.now },
   notes: { type: String },
+  status: { type: String, default: "Draft", enum: ["Draft", "Sent"] },
 });
 const Prescription = mongoose.model("Prescription", prescriptionSchema);
+
+// Feedback Schema
+const feedbackSchema = new mongoose.Schema({
+  appointmentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Appointment",
+    required: true,
+  },
+  doctorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doctor",
+    required: true,
+  },
+  patientEmail: { type: String, required: true },
+  communication: { type: String, required: true },
+  concernsAddressed: { type: String, required: true },
+  recommendation: { type: String, required: true },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  date: { type: Date, default: Date.now },
+});
+const Feedback = mongoose.model("Feedback", feedbackSchema);
 
 // Initialize Admin User
 const initializeAdminUser = async () => {
@@ -142,83 +166,114 @@ const initializeAdminUser = async () => {
 // Seed Test Data
 const seedTestData = async () => {
   try {
-    const doctorCount = await Doctor.countDocuments();
-    if (doctorCount === 0) {
-      const doctors = [
+    await Doctor.deleteMany({});
+    await User.deleteMany({ role: { $ne: "Admin" } });
+    await Appointment.deleteMany({});
+    await Feedback.deleteMany({});
+    await Prescription.deleteMany({});
+    console.log(
+      "Cleared Doctor, non-Admin Users, Appointment, Feedback, and Prescription collections"
+    );
+
+    // Seed a test doctor
+    const doctor = new Doctor({
+      name: "Dr. Suriya",
+      email: "doctor@example.com",
+      specialty: "General Practitioner",
+      availability: ["2025-05-01 10:00"],
+    });
+    await doctor.save();
+    console.log("Seeded test doctor:", doctor);
+
+    // Seed a test user (patient)
+    const patientPassword = await bcrypt.hash("patient123", 10);
+    const patient = new User({
+      name: "Test Patient",
+      email: "test@example.com",
+      password: patientPassword,
+      role: "Patient",
+      healthDetails: {
+        weight: "70",
+        height: "175",
+        bloodGroup: "O+",
+        bloodPressure: "120/80",
+        heartRate: "72",
+        temperature: "36.6",
+        medicalConditions: ["Asthma"],
+        medications: [],
+        allergies: ["Peanuts"],
+        activityLevel: 50,
+        waterIntake: 2000,
+        predictedWeightTrend: [70, 70.1, 70.2, 70.3, 70.4, 70.5],
+      },
+      healthHistory: [
         {
-          name: "Peter",
-          email: "peter@gmail.com",
-          specialty: "General Practitioner",
+          date: new Date(),
+          weight: "70",
+          bloodPressure: "120/80",
+          heartRate: "72",
+          temperature: "36.6",
+          activityLevel: 50,
+          waterIntake: 2000,
         },
-        { name: "Sanjay", email: "sanjay@gmail.com", specialty: "Cardiology" },
+      ],
+    });
+    await patient.save();
+    console.log("Seeded test patient:", patient);
+
+    // Seed a test appointment (Completed status for feedback testing)
+    const appointment = new Appointment({
+      doctorId: doctor._id,
+      patientEmail: patient.email,
+      patientName: patient.name,
+      date: "2025-05-01",
+      time: "10:00",
+      status: "Confirmed",
+      queuePosition: 0,
+    });
+    await appointment.save();
+    console.log("Seeded test appointment:", appointment);
+
+    // Seed feedback for the doctor
+    const feedback = new Feedback({
+      appointmentId: appointment._id,
+      doctorId: doctor._id,
+      patientEmail: patient.email,
+      communication: "Excellent",
+      concernsAddressed: "Very well",
+      recommendation: "Highly recommend",
+      rating: 5,
+      date: new Date(),
+    });
+    await feedback.save();
+    console.log("Seeded test feedback:", feedback);
+
+    // Update doctor's rating
+    doctor.rating = 5; // Since there's only one feedback
+    await doctor.save();
+
+    // Seed a test prescription
+    const prescription = new Prescription({
+      doctorId: doctor._id,
+      patientEmail: patient.email,
+      medications: [
         {
-          name: "Alexander",
-          email: "alexander@gmail.com",
-          specialty: "Dermatology",
+          name: "Paracetamol",
+          dosage: "500mg",
+          frequency: "Twice daily",
+          duration: "5 days",
         },
-      ];
-      await Doctor.insertMany(doctors);
-      console.log("Test doctors seeded");
-    }
+      ],
+      notes: "Take after meals",
+      status: "Sent", // Changed to "Sent" so patient can see it
+    });
+    await prescription.save();
+    console.log("Seeded test prescription:", prescription);
 
     const appointmentCount = await Appointment.countDocuments();
-    if (appointmentCount === 0) {
-      const doctors = await Doctor.find();
-      const appointments = [
-        {
-          doctorId: doctors.find((d) => d.email === "peter@gmail.com")._id,
-          patientEmail: "patient@example.com",
-          patientName: "Patient",
-          date: "2025-05-22",
-          time: "10:00-10:30",
-          status: "Pending",
-        },
-        {
-          doctorId: doctors.find((d) => d.email === "sanjay@gmail.com")._id,
-          patientEmail: "patient@example.com",
-          patientName: "Patient",
-          date: "2025-05-25",
-          time: "09:00-09:30",
-          status: "Pending",
-        },
-        {
-          doctorId: doctors.find((d) => d.email === "sanjay@gmail.com")._id,
-          patientEmail: "patient@example.com",
-          patientName: "John Doe",
-          date: "2025-06-26",
-          time: "11:00-11:30",
-          status: "Pending",
-        },
-        {
-          doctorId: doctors.find((d) => d.email === "sanjay@gmail.com")._id,
-          patientEmail: "patient1@example.com",
-          patientName: "Patient One",
-          date: "2025-07-30",
-          time: "09:00-09:30",
-          status: "Pending",
-        },
-        {
-          doctorId: doctors.find((d) => d.email === "alexander@gmail.com")._id,
-          patientEmail: "anwar@gmail.com",
-          patientName: "anwar",
-          date: "2025-05-30",
-          time: "10:00-10:30",
-          status: "Pending",
-        },
-        {
-          doctorId: doctors.find((d) => d.email === "alexander@gmail.com")._id,
-          patientEmail: "rxj@gmail.com",
-          patientName: "rxj",
-          date: "2025-06-15",
-          time: "14:00-14:30",
-          status: "Pending",
-        },
-      ];
-      await Appointment.insertMany(appointments);
-      console.log("Test appointments seeded");
-    }
+    console.log(`Total appointments seeded: ${appointmentCount}`);
   } catch (error) {
-    console.error("Error seeding test data:", error);
+    console.error("Error during seedTestData:", error);
   }
 };
 
@@ -226,9 +281,13 @@ const seedTestData = async () => {
 app.post("/user/signup", async (req, res) => {
   try {
     const { name, email, password, role, healthDetails, specialty } = req.body;
+    console.log("Signup request received with data:", req.body);
+
     const existingUser = await User.findOne({ email });
-    if (existingUser)
+    if (existingUser) {
+      console.log("User already exists with email:", email);
       return res.status(400).json({ message: "User already exists" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({
@@ -271,6 +330,7 @@ app.post("/user/signup", async (req, res) => {
           : [],
     });
     await user.save();
+    console.log(`User successfully created: ${email} with role: ${role}`);
 
     if (role === "Doctor") {
       const existingDoctor = await Doctor.findOne({ email });
@@ -327,6 +387,7 @@ app.post("/user/login", async (req, res) => {
 app.get("/api/patients", async (req, res) => {
   try {
     const patients = await User.find({ role: "Patient" }).select("-password");
+    console.log(`Fetched ${patients.length} patients:`, patients);
     res.json(patients);
   } catch (error) {
     console.error("Fetch patients error:", error);
@@ -475,6 +536,66 @@ app.delete("/api/doctors/:id", async (req, res) => {
   }
 });
 
+// New PUT Endpoint for Doctor Details
+app.put("/api/doctor/details/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    console.log(
+      "Updating doctor details for email:",
+      email,
+      "with body:",
+      req.body
+    );
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const user = await User.findOne({ email, role: "Doctor" });
+    if (!user)
+      return res.status(404).json({ message: "Doctor user not found" });
+
+    const {
+      specialty,
+      qualifications,
+      experience,
+      contactNumber,
+      bio,
+      availability,
+    } = req.body;
+
+    let doctorDoc = await Doctor.findOne({ email });
+    if (!doctorDoc) {
+      doctorDoc = new Doctor({
+        name: user.name,
+        email,
+        specialty: specialty || "General Practitioner",
+        availability: availability || [],
+        qualifications: qualifications || "",
+        experience: experience || "",
+        contactNumber: contactNumber || "",
+        bio: bio || "",
+      });
+      await doctorDoc.save();
+      console.log(`New doctor document created for: ${email}`);
+    } else {
+      doctorDoc.specialty = specialty || doctorDoc.specialty;
+      doctorDoc.availability = availability || doctorDoc.availability;
+      doctorDoc.qualifications = qualifications || doctorDoc.qualifications;
+      doctorDoc.experience = experience || doctorDoc.experience;
+      doctorDoc.contactNumber = contactNumber || doctorDoc.contactNumber;
+      doctorDoc.bio = bio || doctorDoc.bio;
+      await doctorDoc.save();
+      console.log(`Doctor details updated for: ${email}`);
+    }
+
+    res.json({
+      message: "Doctor details updated successfully",
+      doctor: doctorDoc,
+    });
+  } catch (error) {
+    console.error("Update doctor details error:", error);
+    res.status(500).json({ message: "Failed to update doctor details", error });
+  }
+});
+
 // Appointment Endpoints
 app.get("/api/appointments", async (req, res) => {
   try {
@@ -525,7 +646,6 @@ app.get("/api/appointments/doctor/:email", async (req, res) => {
       doctorId: doctorDoc._id,
     }).populate("doctorId", "name specialty email");
 
-    // Fetch patient details for all appointments
     const patientEmails = appointments.map(
       (appointment) => appointment.patientEmail
     );
@@ -534,7 +654,6 @@ app.get("/api/appointments/doctor/:email", async (req, res) => {
       role: "Patient",
     }).select("-password");
 
-    // Merge patient details into appointments
     const appointmentsWithPatients = appointments.map((appointment) => {
       const patient = patients.find(
         (p) => p.email === appointment.patientEmail
@@ -561,21 +680,17 @@ app.post("/api/appointments", async (req, res) => {
     const { doctorId, patientEmail, patientName, date, time, status } =
       req.body;
 
-    // Validate doctor existence
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
 
-    // Check for existing appointments for the same doctor, date, and time
     const existingAppointments = await Appointment.find({
       doctorId,
       date,
       time,
     }).sort({ queuePosition: 1 });
 
-    // Calculate queue position (0 for first, 1 for second, etc.)
     const queuePosition = existingAppointments.length;
 
-    // Create new appointment with appropriate status
     const appointment = new Appointment({
       doctorId,
       patientEmail,
@@ -588,7 +703,6 @@ app.post("/api/appointments", async (req, res) => {
 
     await appointment.save();
 
-    // Populate doctor details for the response
     await appointment.populate("doctorId", "name specialty email");
 
     res.status(201).json({
@@ -631,6 +745,31 @@ app.put("/api/appointments/:id", async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to reschedule appointment", error });
+  }
+});
+
+app.put("/api/appointments/update-status/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+    console.log(
+      `Updating status for appointment ID: ${req.params.id} to ${status}`
+    );
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    if (!appointment) {
+      console.log(`Appointment not found for ID: ${req.params.id}`);
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+    console.log(`Appointment status updated:`, appointment);
+    res.json({ message: "Appointment status updated", appointment });
+  } catch (error) {
+    console.error("Update status error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to update appointment status", error });
   }
 });
 
@@ -725,11 +864,9 @@ app.put("/api/appointments/:id/virtual", async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    // Update status to indicate it's a virtual appointment
     appointment.status = "Virtual";
     await appointment.save();
 
-    // Optionally, reassign queue positions for remaining appointments in the same slot
     const remainingAppointments = await Appointment.find({
       doctorId: appointment.doctorId,
       date: appointment.date,
@@ -738,7 +875,6 @@ app.put("/api/appointments/:id/virtual", async (req, res) => {
       status: "Queued",
     }).sort({ queuePosition: 1 });
 
-    // Reassign queue positions
     for (let i = 0; i < remainingAppointments.length; i++) {
       remainingAppointments[i].queuePosition = i + 1;
       await remainingAppointments[i].save();
@@ -750,6 +886,152 @@ app.put("/api/appointments/:id/virtual", async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to set virtual appointment", error });
+  }
+});
+
+// Feedback Endpoints
+app.post("/api/feedback", async (req, res) => {
+  try {
+    const {
+      appointmentId,
+      doctorId,
+      patientEmail,
+      communication,
+      concernsAddressed,
+      recommendation,
+      rating,
+    } = req.body;
+
+    // Validate appointment and doctor
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+    if (
+      appointment.status !== "Completed" &&
+      appointment.status !== "Finished"
+    ) {
+      return res.status(400).json({
+        message:
+          "Feedback can only be submitted for completed or finished appointments",
+      });
+    }
+    if (appointment.patientEmail !== patientEmail) {
+      return res.status(403).json({
+        message: "You can only provide feedback for your own appointments",
+      });
+    }
+
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    // Check if feedback already exists for this appointment
+    const existingFeedback = await Feedback.findOne({ appointmentId });
+    if (existingFeedback) {
+      return res
+        .status(400)
+        .json({ message: "Feedback already submitted for this appointment" });
+    }
+
+    // Create new feedback
+    const feedback = new Feedback({
+      appointmentId,
+      doctorId,
+      patientEmail,
+      communication,
+      concernsAddressed,
+      recommendation,
+      rating,
+      date: new Date(),
+    });
+    await feedback.save();
+
+    // Update doctor's average rating
+    const feedbacks = await Feedback.find({ doctorId });
+    const avgRating =
+      feedbacks.reduce((sum, fb) => sum + fb.rating, 0) / feedbacks.length;
+    doctor.rating = avgRating;
+    await doctor.save();
+
+    res
+      .status(201)
+      .json({ message: "Feedback submitted successfully", feedback });
+  } catch (error) {
+    console.error("Submit feedback error:", error);
+    res.status(500).json({ message: "Failed to submit feedback", error });
+  }
+});
+
+app.get("/api/feedback/doctor/:doctorEmail", async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ email: req.params.doctorEmail });
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+    const feedbacks = await Feedback.find({ doctorId: doctor._id })
+      .populate("appointmentId", "date time")
+      .sort({ date: -1 });
+
+    // Fetch patient details for each feedback
+    const patientEmails = feedbacks.map((feedback) => feedback.patientEmail);
+    const patients = await User.find({
+      email: { $in: patientEmails },
+      role: "Patient",
+    }).select("name email");
+
+    const feedbacksWithPatientDetails = feedbacks.map((feedback) => {
+      const patient = patients.find((p) => p.email === feedback.patientEmail);
+      return {
+        ...feedback.toObject(),
+        patientDetails: patient || {
+          name: "Unknown Patient",
+          email: feedback.patientEmail,
+        },
+      };
+    });
+
+    res.json(feedbacksWithPatientDetails);
+  } catch (error) {
+    console.error("Fetch doctor feedback error:", error);
+    res.status(500).json({ message: "Failed to load feedback", error });
+  }
+});
+
+// Admin endpoint to fetch feedback for a specific doctor
+app.get("/api/admin/feedback/doctor/:doctorEmail", async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ email: req.params.doctorEmail });
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+    const feedbacks = await Feedback.find({ doctorId: doctor._id })
+      .populate("appointmentId", "date time")
+      .sort({ date: -1 });
+
+    // Fetch patient details for each feedback
+    const patientEmails = feedbacks.map((feedback) => feedback.patientEmail);
+    const patients = await User.find({
+      email: { $in: patientEmails },
+      role: "Patient",
+    }).select("name email");
+
+    const feedbacksWithPatientDetails = feedbacks.map((feedback) => {
+      const patient = patients.find((p) => p.email === feedback.patientEmail);
+      return {
+        ...feedback.toObject(),
+        patientDetails: patient || {
+          name: "Unknown Patient",
+          email: feedback.patientEmail,
+        },
+      };
+    });
+
+    res.json(feedbacksWithPatientDetails);
+  } catch (error) {
+    console.error("Admin fetch doctor feedback error:", error);
+    res.status(500).json({ message: "Failed to load feedback", error });
   }
 });
 
@@ -772,6 +1054,7 @@ app.get("/api/prescriptions/patient/:email", async (req, res) => {
   try {
     const prescriptions = await Prescription.find({
       patientEmail: req.params.email,
+      status: "Sent", // Only return prescriptions that have been sent
     }).populate("doctorId", "name specialty");
     res.json(prescriptions);
   } catch (error) {
@@ -785,6 +1068,11 @@ app.post("/api/prescriptions", async (req, res) => {
     const { doctorId, patientEmail, medications, notes } = req.body;
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+    const patient = await User.findOne({
+      email: patientEmail,
+      role: "Patient",
+    });
+    if (!patient) return res.status(404).json({ message: "Patient not found" });
     const prescription = new Prescription({
       doctorId,
       patientEmail,
@@ -827,6 +1115,40 @@ app.delete("/api/prescriptions/:id", async (req, res) => {
   } catch (error) {
     console.error("Delete prescription error:", error);
     res.status(500).json({ message: "Failed to delete prescription", error });
+  }
+});
+
+// Endpoint to mark prescription as sent
+app.put("/api/prescriptions/send/:id", async (req, res) => {
+  try {
+    const prescription = await Prescription.findById(req.params.id);
+    if (!prescription) {
+      return res.status(404).json({ message: "Prescription not found" });
+    }
+    if (prescription.status === "Sent") {
+      return res.status(400).json({ message: "Prescription already sent" });
+    }
+    prescription.status = "Sent";
+    await prescription.save();
+    res.json({ message: "Prescription sent successfully", prescription });
+  } catch (error) {
+    console.error("Send prescription error:", error);
+    res.status(500).json({ message: "Failed to send prescription", error });
+  }
+});
+
+// Admin endpoint to fetch prescriptions for a specific doctor
+app.get("/api/admin/prescriptions/doctor/:doctorEmail", async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ email: req.params.doctorEmail });
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+    const prescriptions = await Prescription.find({
+      doctorId: doctor._id,
+    }).populate("doctorId", "name specialty");
+    res.json(prescriptions);
+  } catch (error) {
+    console.error("Admin fetch doctor prescriptions error:", error);
+    res.status(500).json({ message: "Failed to load prescriptions", error });
   }
 });
 
@@ -919,6 +1241,9 @@ app.post("/api/doctor/details", async (req, res) => {
       contactNumber,
       bio,
     } = req.body;
+    console.log("Received doctor details request with body:", req.body);
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
     const user = await User.findOne({ email, role: "Doctor" });
     if (!user) return res.status(404).json({ message: "Doctor not found" });
 
@@ -927,23 +1252,25 @@ app.post("/api/doctor/details", async (req, res) => {
       doctorDoc = new Doctor({
         name: user.name,
         email,
-        specialty,
-        availability,
-        qualifications,
-        experience,
-        contactNumber,
-        bio,
+        specialty: specialty || "General Practitioner",
+        availability: availability || [],
+        qualifications: qualifications || "",
+        experience: experience || "",
+        contactNumber: contactNumber || "",
+        bio: bio || "",
       });
       await doctorDoc.save();
+      console.log(`New doctor document created for: ${email}`);
     } else {
       doctorDoc.name = user.name;
-      doctorDoc.specialty = specialty;
-      doctorDoc.availability = availability;
-      doctorDoc.qualifications = qualifications;
-      doctorDoc.experience = experience;
-      doctorDoc.contactNumber = contactNumber;
-      doctorDoc.bio = bio;
+      doctorDoc.specialty = specialty || doctorDoc.specialty;
+      doctorDoc.availability = availability || doctorDoc.availability;
+      doctorDoc.qualifications = qualifications || doctorDoc.qualifications;
+      doctorDoc.experience = experience || doctorDoc.experience;
+      doctorDoc.contactNumber = contactNumber || doctorDoc.contactNumber;
+      doctorDoc.bio = bio || doctorDoc.bio;
       await doctorDoc.save();
+      console.log(`Doctor details updated for: ${email}`);
     }
 
     res.json({
@@ -993,7 +1320,7 @@ app.get("/api/doctor-dashboard/:email/:year", async (req, res) => {
     const highPriorityTasks = Math.floor(importantTasks * 0.3);
     const waitingPatients = appointments.filter(
       (a) => a.status === "Queued"
-    ).length; // Updated to reflect queued patients
+    ).length;
     const patientIncrease = 120;
     const totalPayments = 64;
     const paymentIncrease = 24;
@@ -1081,6 +1408,16 @@ app.get("/api/doctor-dashboard/:email/:year", async (req, res) => {
       ageData,
       genderData,
       appointments: appointmentData,
+      patients: patients.map((patient, index) => ({
+        id: index + 1,
+        name: patient.name,
+        email: patient.email,
+        age: patient.healthDetails?.age || "N/A",
+        gender: patient.healthDetails?.gender || "N/A",
+        status:
+          appointmentData.find((a) => a.patientEmail === patient.email)
+            ?.status || "N/A",
+      })),
     });
   } catch (error) {
     console.error("Fetch dashboard data error:", error);

@@ -1,6 +1,4 @@
 <div class="receptionist-dashboard">
-  <!-- Back Button -->
-  <!-- Inside receptionist-dashboard.component.html -->
   <div style="position: fixed; bottom: 20px; right: 20px">
     <button (click)="goBack()">🔙 Back to Home</button>
   </div>
@@ -13,12 +11,7 @@
   <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
   <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
 
-  <!-- Optional test button for verifying click -->
-  <button (click)="onAction('confirm', { _id: 'test123' })">
-    Test Action Button
-  </button>
-
-  <table>
+  <table *ngIf="appointments.length > 0; else noAppointments">
     <thead>
       <tr>
         <th>ID</th>
@@ -28,37 +21,30 @@
         <th>Date</th>
         <th>Time</th>
         <th>Status</th>
-        <th>Actions</th>
+        <th>Update Status</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let appointment of appointments">
+      <tr *ngFor="let appointment of appointments; trackBy: trackById">
         <td>{{ appointment._id }}</td>
         <td>{{ appointment.patientEmail }}</td>
         <td>{{ appointment.patientName }}</td>
-        <td>{{ appointment.doctorId?.email }}</td>
+        <td>{{ appointment.doctorId?.email || appointment.doctorId }}</td>
         <td>{{ appointment.date }}</td>
         <td>{{ appointment.time }}</td>
         <td>{{ appointment.status }}</td>
         <td>
-          <button
-            class="action-btn confirm-btn"
-            (click)="onAction('confirm', appointment)"
-            [disabled]="appointment.status !== 'Pending'"
-            title="Confirm Appointment"
-          >
-            ✅
-          </button>
-          <button
-            class="action-btn cancel-btn"
-            (click)="onAction('cancel', appointment)"
-            [disabled]="appointment.status !== 'Pending'"
-            title="Cancel Appointment"
-          >
-            ❌
-          </button>
+          <input
+            type="text"
+            placeholder="Type 'present' to update"
+            (input)="updateStatus(appointment, $event)"
+          />
         </td>
       </tr>
     </tbody>
   </table>
+
+  <ng-template #noAppointments>
+    <p>No appointments available to display.</p>
+  </ng-template>
 </div>

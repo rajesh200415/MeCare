@@ -1,5 +1,5 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -16,7 +16,7 @@ function passwordValidator(control: any) {
   templateUrl: './login-signup.component.html',
   styleUrls: ['./login-signup.component.css'],
 })
-export class LoginSignupComponent {
+export class LoginSignupComponent implements OnInit {
   isSignInMode = false;
   roles = ['Patient', 'Doctor', 'Pharmacist', 'Admin', 'Receptionist'];
   specialties = [
@@ -33,7 +33,7 @@ export class LoginSignupComponent {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
+    private http: HttpClient, // Fixed typo: Client -> HttpClient
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {
@@ -74,6 +74,46 @@ export class LoginSignupComponent {
     });
   }
 
+  ngOnInit() {
+    const userEmail = localStorage.getItem('userEmail');
+    const userRole = localStorage.getItem('userRole');
+    console.log(
+      'LoginSignupComponent ngOnInit - userEmail:',
+      userEmail,
+      'userRole:',
+      userRole
+    );
+
+    if (userEmail && userRole) {
+      console.log(
+        'User already logged in. Redirecting based on role:',
+        userRole
+      );
+      let route = '/homepage';
+      if (userRole === 'Doctor') {
+        route = '/doctor/dashboard';
+      } else if (userRole === 'Admin') {
+        route = '/admin-dashboard';
+      } else if (userRole === 'Patient') {
+        route = '/patient-dashboard';
+      } else if (userRole === 'Pharmacist') {
+        route = '/pharmacist-dashboard';
+      } else if (userRole === 'Receptionist') {
+        route = '/receptionist-dashboard';
+      }
+
+      this.router
+        .navigateByUrl(route, { replaceUrl: true })
+        .then(() => {
+          console.log('Navigated to:', route);
+        })
+        .catch((err) => {
+          console.error('Navigation error in ngOnInit:', err);
+          this.errorMessage = 'Failed to navigate after login check';
+        });
+    }
+  }
+
   // Method to evaluate and update password strength
   updatePasswordStrength(password: string) {
     if (!password) {
@@ -109,14 +149,16 @@ export class LoginSignupComponent {
     this.cdr.detectChanges(); // Ensure UI updates
   }
 
-  isRouteActive(route: string): boolean {
-    return this.router.isActive(route, true);
-  }
-
   toggleMode() {
     this.isSignInMode = !this.isSignInMode;
     this.errorMessage = '';
     this.passwordStrength = ''; // Reset password strength when toggling
+    this.signupForm.reset({
+      role: 'Patient',
+      healthDetails: { weight: '', height: '', bloodGroup: '' },
+      specialty: '',
+    });
+    this.signinForm.reset();
   }
 
   onSignupSubmit() {
@@ -130,7 +172,22 @@ export class LoginSignupComponent {
     );
     if (this.signupForm.invalid) {
       this.errorMessage = 'Please fill all required fields correctly';
-      console.log('Form validation errors:', this.signupForm.errors);
+      const errors: { [key: string]: any } = {};
+      Object.keys(this.signupForm.controls).forEach((key) => {
+        const controlErrors = this.signupForm.get(key)?.errors;
+        if (controlErrors) errors[key] = controlErrors;
+        if (key === 'healthDetails') {
+          const healthDetailsGroup = this.signupForm.get(
+            'healthDetails'
+          ) as FormGroup;
+          Object.keys(healthDetailsGroup.controls).forEach((subKey) => {
+            const subControlErrors = healthDetailsGroup.get(subKey)?.errors;
+            if (subControlErrors)
+              errors[`healthDetails.${subKey}`] = subControlErrors;
+          });
+        }
+      });
+      console.log('Detailed form errors:', errors);
       return;
     }
 
@@ -155,7 +212,8 @@ export class LoginSignupComponent {
         });
         this.toggleMode();
       },
-      (error) => {
+      (error: HttpErrorResponse) => {
+        // Added type for error
         console.error('Signup error details:', error);
         if (error.status === 400) {
           this.errorMessage =
@@ -164,14 +222,22 @@ export class LoginSignupComponent {
             console.log('Duplicate email detected:', signupData.email);
           }
         } else if (error.status === 500) {
-          this.errorMessage = 'Server error, please try again';
+          this.errorMessage =
+            'Server error, please try again. Check server logs.';
         } else {
           this.errorMessage =
             'Failed to sign up: ' + (error.error?.message || 'Unknown error');
         }
-        console.log('Error response:', error.error);
+        console.log('Full error response:', JSON.stringify(error, null, 2));
       }
     );
+  }
+
+  onSignInButtonClick() {
+    console.log('Sign In button clicked. Form valid:', this.signinForm.valid);
+    if (this.signinForm.invalid) {
+      console.log('Sign In button click aborted: Form is invalid');
+    }
   }
 
   onSignIn() {
@@ -183,6 +249,12 @@ export class LoginSignupComponent {
     );
     if (this.signinForm.invalid) {
       this.errorMessage = 'Please fill all required fields correctly';
+      const errors: { [key: string]: any } = {};
+      Object.keys(this.signinForm.controls).forEach((key) => {
+        const controlErrors = this.signinForm.get(key)?.errors;
+        if (controlErrors) errors[key] = controlErrors;
+      });
+      console.log('Detailed signin form errors:', errors);
       return;
     }
 
@@ -191,8 +263,8 @@ export class LoginSignupComponent {
       password: this.signinForm.value.password,
     };
     console.log('Login attempt with data:', signinData);
-    this.http.post('http://localhost:3000/user/login', signinData).subscribe(
-      (response: any) => {
+    this.http.post('http://localhost:3000/user/login', signinData).subscribe({
+      next: (response: any) => {
         console.log('Login response:', response);
         if (response && response.user) {
           this.errorMessage = '';
@@ -227,27 +299,55 @@ export class LoginSignupComponent {
           console.log('Attempting navigation to:', route);
           this.router
             .navigateByUrl(route, { replaceUrl: true })
-            .then(() => {
-              console.log('Navigated to:', route);
-              this.cdr.detectChanges();
+            .then((success) => {
+              if (success) {
+                console.log('Successfully navigated to:', route);
+                this.cdr.detectChanges();
+              } else {
+                console.error('Navigation failed without throwing an error');
+                this.errorMessage = 'Navigation failed after login';
+              }
             })
             .catch((err) => {
               console.error('Navigation error:', err);
-              this.errorMessage = 'Failed to navigate after login';
+              this.errorMessage =
+                'Failed to navigate after login: ' + err.message;
             });
         } else {
           this.errorMessage = 'Invalid login response from server';
+          console.error('Invalid response structure:', response);
         }
       },
-      (error) => {
+      error: (error: HttpErrorResponse) => {
+        // Added type for error
         console.error('Login error details:', error);
         console.log('Full error object:', JSON.stringify(error, null, 2));
         this.errorMessage = error.error?.message || 'Failed to login';
         if (error.status === 404) this.errorMessage = 'User not found';
         else if (error.status === 401)
           this.errorMessage = 'Invalid credentials';
-      }
-    );
+        else if (error.status === 0) {
+          this.errorMessage =
+            'Server not reachable. Ensure the backend server is running on port 3000.';
+          // Fallback navigation for debugging
+          console.log('Attempting fallback navigation to /homepage');
+          this.router
+            .navigateByUrl('/homepage', { replaceUrl: true })
+            .then((success) => {
+              console.log(
+                'Fallback navigation to /homepage successful:',
+                success
+              );
+            })
+            .catch((err) => {
+              console.error('Fallback navigation error:', err);
+            });
+        }
+      },
+      complete: () => {
+        console.log('Login HTTP request completed');
+      },
+    });
   }
 
   get signupName() {
@@ -269,6 +369,6 @@ export class LoginSignupComponent {
     return this.signinForm.get('email');
   }
   get signinPassword() {
-    return this.signinForm.get('signinPassword');
+    return this.signinForm.get('password');
   }
 }

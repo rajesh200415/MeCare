@@ -1,1 +1,59 @@
-<p>doctor-patients works!</p>
+<div class="patients-container">
+  <h2>My Patients</h2>
+
+  <table *ngIf="patients.length > 0; else noPatients">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Weight</th>
+        <th>Height</th>
+        <th>Blood Group</th>
+        <th>Blood Pressure</th>
+        <th>Heart Rate</th>
+        <th>Temperature</th>
+        <th>Medical Conditions</th>
+        <th>Allergies</th>
+        <th>Appointment Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let patient of patients">
+        <td>{{ patient.name }}</td>
+        <td>{{ patient.email }}</td>
+        <td>{{ patient.healthDetails?.weight || "N/A" }}</td>
+        <td>{{ patient.healthDetails?.height || "N/A" }}</td>
+        <td>{{ patient.healthDetails?.bloodGroup || "N/A" }}</td>
+        <td>{{ patient.healthDetails?.bloodPressure || "N/A" }}</td>
+        <td>{{ patient.healthDetails?.heartRate || "N/A" }}</td>
+        <td>{{ patient.healthDetails?.temperature || "N/A" }}</td>
+        <td>
+          {{ patient.healthDetails?.medicalConditions?.join(", ") || "None" }}
+        </td>
+        <td>{{ patient.healthDetails?.allergies?.join(", ") || "None" }}</td>
+        <td>
+          {{ getPatientAppointment(patient.email)?.status || "No Appointment" }}
+        </td>
+        <td>
+          <button
+            *ngIf="
+              getPatientAppointment(patient.email) &&
+              getPatientAppointment(patient.email).status !== 'Finished' &&
+              getPatientAppointment(patient.email).status !== 'Canceled'
+            "
+            (click)="markAsFinished(getPatientAppointment(patient.email)._id)"
+          >
+            Completed
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #noPatients>
+    <p>No patients found.</p>
+  </ng-template>
+
+  <button class="back-button" (click)="goBack()">Back</button>
+</div>

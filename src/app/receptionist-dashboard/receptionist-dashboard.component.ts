@@ -23,32 +23,41 @@ export class ReceptionistDashboardComponent implements OnInit {
   }
 
   fetchAppointments(): void {
-    this.http.get<any[]>('http://localhost:3000/api/appointments').subscribe({
-      next: (data) => {
-        this.appointments = data;
-        console.log(
-          '[' + new Date().toISOString() + '] Fetched appointments:',
-          data
-        );
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.errorMessage = 'Error fetching appointments: ' + err.message;
-        console.error('[' + new Date().toISOString() + '] Fetch error:', err);
-      },
-    });
+    this.http
+      .get<any[]>('http://localhost:3000/api/appointments', {
+        observe: 'response',
+      })
+      .subscribe({
+        next: (response) => {
+          console.log(
+            '[' + new Date().toISOString() + '] Full API response:',
+            response
+          );
+          this.appointments = response.body || [];
+          console.log(
+            '[' + new Date().toISOString() + '] Fetched appointments:',
+            this.appointments
+          );
+          if (this.appointments.length === 0) {
+            this.errorMessage = 'No appointments found.';
+          } else {
+            this.errorMessage = '';
+          }
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.errorMessage = 'Error fetching appointments: ' + err.message;
+          console.error('[' + new Date().toISOString() + '] Fetch error:', err);
+          this.appointments = [];
+          this.cdr.detectChanges();
+        },
+      });
   }
 
-  onAction(action: 'confirm' | 'cancel', appointment: any): void {
-    console.log(
-      '[' +
-        new Date().toISOString() +
-        '] ' +
-        action +
-        ' clicked for appointment ID: ' +
-        appointment._id,
-      appointment
-    );
+  updateStatus(appointment: any, event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const inputValue = inputElement.value.trim().toLowerCase();
+
     if (!appointment._id) {
       this.errorMessage = 'Appointment ID missing';
       console.error(
@@ -58,35 +67,37 @@ export class ReceptionistDashboardComponent implements OnInit {
       return;
     }
 
-    const url = `http://localhost:3000/api/appointments/${action}/${appointment._id}`;
-    console.log(
-      '[' + new Date().toISOString() + '] Sending PUT request to: ' + url
-    );
-    this.http.put(url, {}).subscribe({
-      next: (response) => {
-        console.log(
-          '[' + new Date().toISOString() + '] ' + action + ' response:',
-          response
-        );
-        this.successMessage = `Appointment ${action}ed successfully`;
-        this.errorMessage = '';
-        this.fetchAppointments();
-      },
-      error: (err) => {
-        this.errorMessage = `Failed to ${action} appointment: ${err.status} - ${err.statusText} - ${err.message}`;
-        this.successMessage = '';
-        console.error(
-          '[' + new Date().toISOString() + '] ' + action + ' error:',
-          err
-        );
-        console.error('Error details:', err.error);
-      },
-      complete: () => {
-        console.log(
-          '[' + new Date().toISOString() + '] ' + action + ' request completed'
-        );
-      },
-    });
+    if (inputValue === 'present') {
+      const url = `http://localhost:3000/api/appointments/update-status/${appointment._id}`;
+      console.log(
+        '[' + new Date().toISOString() + '] Sending PUT request to: ' + url
+      );
+      this.http.put(url, { status: 'Present' }).subscribe({
+        next: (response) => {
+          console.log(
+            '[' + new Date().toISOString() + '] Update status response:',
+            response
+          );
+          this.successMessage = 'Appointment status updated to Present';
+          this.errorMessage = '';
+          this.fetchAppointments();
+        },
+        error: (err) => {
+          this.errorMessage = `Failed to update appointment status: ${err.status} - ${err.statusText} - ${err.message}`;
+          this.successMessage = '';
+          console.error(
+            '[' + new Date().toISOString() + '] Update status error:',
+            err
+          );
+          console.error('Error details:', JSON.stringify(err.error, null, 2));
+        },
+        complete: () => {
+          console.log(
+            '[' + new Date().toISOString() + '] Update status request completed'
+          );
+        },
+      });
+    }
   }
 
   logout(): void {
@@ -95,7 +106,7 @@ export class ReceptionistDashboardComponent implements OnInit {
       '[' + new Date().toISOString() + '] Current localStorage user:',
       localStorage.getItem('user')
     );
-    localStorage.removeItem('user'); // Clear user session
+    localStorage.removeItem('user');
     console.log(
       '[' + new Date().toISOString() + '] After clearing, localStorage user:',
       localStorage.getItem('user')
@@ -116,9 +127,6 @@ export class ReceptionistDashboardComponent implements OnInit {
     );
   }
 
-  trackById(index: number, appointment: any): string {
-    return appointment._id; // Track appointments by their unique _id
-  }
   goBack(): void {
     this.router.navigateByUrl('/homepage').then(
       () => {
@@ -128,8 +136,15 @@ export class ReceptionistDashboardComponent implements OnInit {
       },
       (err) => {
         this.errorMessage = 'Navigation to homepage failed';
-        console.error('Navigation error:', err);
+        console.error(
+          '[' + new Date().toISOString() + '] Navigation error:',
+          err
+        );
       }
     );
+  }
+
+  trackById(index: number, appointment: any): string {
+    return appointment._id || index.toString();
   }
 }

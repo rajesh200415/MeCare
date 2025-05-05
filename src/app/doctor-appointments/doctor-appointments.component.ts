@@ -9,46 +9,55 @@ import { Router } from '@angular/router';
 })
 export class DoctorAppointmentsComponent implements OnInit {
   appointments: any[] = [];
-  displayedColumns: string[] = [
-    'patientEmail',
-    'patientName',
-    'date',
-    'time',
-    'status',
-    'healthDetails', // New column for health details
-  ];
+  userEmail: string;
 
-  doctorEmail: string = localStorage.getItem('userEmail') || '';
+  constructor(private http: HttpClient, private router: Router) {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.userEmail = user.email || '';
+  }
 
-  constructor(private http: HttpClient, private router: Router) {}
-
-  ngOnInit(): void {
-    if (!this.doctorEmail) {
-      console.error('No logged-in doctor found. Please log in first.');
+  ngOnInit() {
+    if (!this.userEmail) {
       this.router.navigate(['/login-signup']);
       return;
     }
     this.fetchAppointments();
   }
 
-  fetchAppointments(): void {
+  fetchAppointments() {
     this.http
       .get<any[]>(
-        `http://localhost:3000/api/appointments/doctor/${this.doctorEmail}`
+        `http://localhost:3000/api/appointments/doctor/${this.userEmail}`
       )
       .subscribe(
-        (appointments) => {
-          this.appointments = appointments;
-          console.log('Appointments received:', appointments);
-          console.log('Appointments array length:', appointments.length);
+        (data) => {
+          this.appointments = data;
         },
         (error) => {
-          console.error('Failed to load appointments:', error);
+          console.error('Error fetching appointments:', error);
+          this.appointments = [];
         }
       );
   }
 
-  goBack(): void {
-    this.router.navigate(['/doctor-dashboard']);
+  markAsFinished(appointmentId: string) {
+    this.http
+      .put(
+        `http://localhost:3000/api/appointments/update-status/${appointmentId}`,
+        { status: 'Finished' }
+      )
+      .subscribe(
+        (response) => {
+          console.log('Appointment marked as Finished:', response);
+          this.fetchAppointments(); // Refresh the list
+        },
+        (error) => {
+          console.error('Error marking appointment as Finished:', error);
+        }
+      );
+  }
+
+  goBack() {
+    this.router.navigate(['/doctor/dashboard']);
   }
 }

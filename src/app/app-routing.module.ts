@@ -20,7 +20,8 @@ import { PrescriptionsComponent } from './prescriptions/prescriptions.component'
 import { DoctorProfileComponent } from './doctor-profile/doctor-profile.component';
 import { ReceptionistDashboardComponent } from './receptionist-dashboard/receptionist-dashboard.component';
 import { PatientDetailsComponent } from './patient-details/patient-details.component';
-import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appointment.component'; // Import VirtualAppointmentComponent
+import { VirtualAppointmentComponent } from './virtual-appointment/virtual-appointment.component';
+import { FeedbackComponent } from './feedback/feedback.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/homepage', pathMatch: 'full' },
@@ -33,29 +34,26 @@ const routes: Routes = [
   { path: 'patient-dashboard', component: PatientDashboardComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'appointments', component: AppointmentsComponent },
-  { path: 'virtual-appointment', component: VirtualAppointmentComponent }, // Add this route
+  { path: 'virtual-appointment', component: VirtualAppointmentComponent },
   { path: 'admin-dashboard', component: AdminDashboardComponent },
   { path: 'receptionist-dashboard', component: ReceptionistDashboardComponent },
+  { path: 'feedback', component: FeedbackComponent },
+  { path: 'prescriptions', component: PrescriptionsComponent }, // New route for patient prescriptions
+  { path: 'doctor/dashboard', component: DoctorDashboardComponent },
+  { path: 'doctor/appointments', component: DoctorAppointmentsComponent },
+  { path: 'doctor/patients', component: DoctorPatientsComponent },
+  { path: 'doctor/messages', component: DoctorMessagesComponent },
+  { path: 'doctor/medications', component: DoctorMedicationsComponent },
+  { path: 'doctor/documents', component: DoctorDocumentsComponent },
+  { path: 'doctor/finances', component: DoctorFinancesComponent },
+  { path: 'doctor/settings', component: DoctorSettingsComponent },
+  { path: 'doctor/prescriptions', component: PrescriptionsComponent },
+  { path: 'doctor/profile', component: DoctorProfileComponent },
   {
-    path: 'doctor',
-    children: [
-      { path: 'dashboard', component: DoctorDashboardComponent },
-      { path: 'appointments', component: DoctorAppointmentsComponent },
-      { path: 'patients', component: DoctorPatientsComponent },
-      { path: 'messages', component: DoctorMessagesComponent },
-      { path: 'medications', component: DoctorMedicationsComponent },
-      { path: 'documents', component: DoctorDocumentsComponent },
-      { path: 'finances', component: DoctorFinancesComponent },
-      { path: 'settings', component: DoctorSettingsComponent },
-      { path: 'prescriptions', component: PrescriptionsComponent },
-      { path: 'profile', component: DoctorProfileComponent },
-      {
-        path: 'patient-details/:patientEmail',
-        component: PatientDetailsComponent,
-      },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-    ],
+    path: 'doctor/patient-details/:patientEmail',
+    component: PatientDetailsComponent,
   },
+  { path: 'doctor', redirectTo: 'doctor/dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: '/homepage' },
 ];
 

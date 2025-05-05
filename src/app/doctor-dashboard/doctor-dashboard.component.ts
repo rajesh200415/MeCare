@@ -1,6 +1,12 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import {
+  Router,
+  NavigationStart,
+  NavigationEnd,
+  NavigationCancel,
+  NavigationError,
+} from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 
 @Component({
@@ -39,41 +45,42 @@ export class DoctorDashboardComponent implements OnInit, AfterViewInit {
       console.warn('No user email found, redirecting to login');
       this.router.navigate(['/login-signup']);
     }
+
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        console.log('NavigationStart:', event.url, 'ID:', event.id);
+      } else if (event instanceof NavigationEnd) {
+        console.log('NavigationEnd:', event.url, 'ID:', event.id);
+      } else if (event instanceof NavigationCancel) {
+        console.log(
+          'NavigationCancel:',
+          event.url,
+          'Reason:',
+          event.reason,
+          'ID:',
+          event.id
+        );
+      } else if (event instanceof NavigationError) {
+        console.error(
+          'NavigationError:',
+          event.url,
+          'Error:',
+          event.error,
+          'ID:',
+          event.id
+        );
+      }
+    });
   }
 
   ngOnInit() {
     if (this.userEmail) {
-      this.seedMockData();
       this.fetchDashboardData();
     }
   }
 
   ngAfterViewInit() {
     setTimeout(() => this.initCharts(), 100);
-  }
-
-  seedMockData() {
-    this.dashboardData.activityData = [
-      { month: 'Jan', thisYear: 50, previousYear: 40 },
-      { month: 'Feb', thisYear: 70, previousYear: 60 },
-      { month: 'Mar', thisYear: 90, previousYear: 80 },
-      { month: 'Apr', thisYear: 110, previousYear: 100 },
-      { month: 'May', thisYear: 130, previousYear: 120 },
-      { month: 'Jun', thisYear: 150, previousYear: 140 },
-      { month: 'Jul', thisYear: 170, previousYear: 160 },
-      { month: 'Aug', thisYear: 190, previousYear: 180 },
-      { month: 'Sep', thisYear: 210, previousYear: 200 },
-      { month: 'Oct', thisYear: 190, previousYear: 180 },
-      { month: 'Nov', thisYear: 170, previousYear: 160 },
-      { month: 'Dec', thisYear: 150, previousYear: 140 },
-    ];
-
-    this.dashboardData.ageData = [
-      { range: '5-17 yo', value: 1280 },
-      { range: '12-25 yo', value: 1780 },
-      { range: '26-45 yo', value: 900 },
-      { range: '46-65 yo', value: 600 },
-    ];
   }
 
   fetchDashboardData() {
@@ -84,26 +91,19 @@ export class DoctorDashboardComponent implements OnInit, AfterViewInit {
       .subscribe(
         (data) => {
           this.dashboardData = {
-            importantTasks:
-              data.importantTasks || this.dashboardData.importantTasks,
-            highPriorityTasks:
-              data.highPriorityTasks || this.dashboardData.highPriorityTasks,
-            newPatients: data.newPatients || this.dashboardData.newPatients,
-            waitingPatients:
-              data.waitingPatients || this.dashboardData.waitingPatients,
-            totalPatients:
-              data.totalPatients || this.dashboardData.totalPatients,
-            patientIncrease:
-              data.patientIncrease || this.dashboardData.patientIncrease,
-            totalPayments:
-              data.totalPayments || this.dashboardData.totalPayments,
-            paymentIncrease:
-              data.paymentIncrease || this.dashboardData.paymentIncrease,
-            activityData: data.activityData || this.dashboardData.activityData,
-            divisionData: data.divisionData || this.dashboardData.divisionData,
-            ageData: data.ageData || this.dashboardData.ageData,
-            genderData: data.genderData || this.dashboardData.genderData,
-            patients: data.patients || this.dashboardData.patients,
+            importantTasks: data.importantTasks || 0,
+            highPriorityTasks: data.highPriorityTasks || 0,
+            newPatients: data.newPatients || 0,
+            waitingPatients: data.waitingPatients || 0,
+            totalPatients: data.totalPatients || 0,
+            patientIncrease: data.patientIncrease || 0,
+            totalPayments: data.totalPayments || 0,
+            paymentIncrease: data.paymentIncrease || 0,
+            activityData: data.activityData || [],
+            divisionData: data.divisionData || [],
+            ageData: data.ageData || [],
+            genderData: data.genderData || [],
+            patients: data.patients || [],
           };
           this.updateCharts();
         },
@@ -201,27 +201,37 @@ export class DoctorDashboardComponent implements OnInit, AfterViewInit {
     }
   }
 
-  navigateTo(section: string) {
+  isActive(section: string): boolean {
+    const currentUrl = this.router.url;
+    const expectedUrl = `/doctor/${section}`;
     console.log(
-      `Clicked ${section.charAt(0).toUpperCase() + section.slice(1)}`
+      `Checking if active: currentUrl=${currentUrl}, expectedUrl=${expectedUrl}`
     );
-    console.log('Attempting to navigate to:', `/doctor/${section}`);
-    this.router
-      .navigate([`/doctor/${section}`])
-      .then((success) => {
+    return currentUrl === expectedUrl;
+  }
+
+  logout() {
+    console.log('Logging out');
+    localStorage.removeItem('user');
+    this.router.navigate(['/login-signup']).then(
+      (success) => {
         console.log(
           'Navigation successful:',
           success,
+          'Target URL:',
+          '/login-signup',
           'Current URL:',
           this.router.url
         );
-      })
-      .catch((err) => {
-        console.error('Navigation failed:', err);
-      });
-  }
-  logout() {
-    localStorage.removeItem('user');
-    this.router.navigate(['/login-signup']);
+      },
+      (error) => {
+        console.error(
+          'Navigation failed:',
+          error,
+          'Target URL:',
+          '/login-signup'
+        );
+      }
+    );
   }
 }

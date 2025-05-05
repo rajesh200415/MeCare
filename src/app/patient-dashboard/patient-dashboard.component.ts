@@ -224,7 +224,6 @@ export class PatientDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Add the missing isRouteActive method
   isRouteActive(route: string): boolean {
     return this.router.isActive(route, true);
   }

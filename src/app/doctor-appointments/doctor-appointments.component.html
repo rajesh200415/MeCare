@@ -1,77 +1,42 @@
-<table>
-  <thead>
-    <tr>
-      <th *ngFor="let column of displayedColumns">{{ column | titlecase }}</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let appointment of appointments">
-      <td>{{ appointment.patientEmail }}</td>
-      <td>{{ appointment.patientName }}</td>
-      <td>{{ appointment.date }}</td>
-      <td>{{ appointment.time }}</td>
-      <td>{{ appointment.status }}</td>
-      <td>
-        <div class="health-details">
-          <p *ngIf="appointment.patientDetails?.error">
-            {{ appointment.patientDetails.error }}
-          </p>
-          <ng-container *ngIf="!appointment.patientDetails?.error">
-            <p>
-              <strong>Weight:</strong>
-              {{ appointment.patientDetails.healthDetails?.weight || "N/A" }}
-            </p>
-            <p>
-              <strong>Height:</strong>
-              {{ appointment.patientDetails.healthDetails?.height || "N/A" }}
-            </p>
-            <p>
-              <strong>Blood Group:</strong>
-              {{
-                appointment.patientDetails.healthDetails?.bloodGroup || "N/A"
-              }}
-            </p>
-            <p>
-              <strong>Blood Pressure:</strong>
-              {{
-                appointment.patientDetails.healthDetails?.bloodPressure || "N/A"
-              }}
-            </p>
-            <p>
-              <strong>Heart Rate:</strong>
-              {{ appointment.patientDetails.healthDetails?.heartRate || "N/A" }}
-            </p>
-            <p>
-              <strong>Temperature:</strong>
-              {{
-                appointment.patientDetails.healthDetails?.temperature || "N/A"
-              }}
-            </p>
-            <p>
-              <strong>Allergies:</strong>
-              {{
-                appointment.patientDetails.healthDetails?.allergies?.length
-                  ? appointment.patientDetails.healthDetails.allergies.join(
-                      ", "
-                    )
-                  : "None"
-              }}
-            </p>
-            <p>
-              <strong>Medical Conditions:</strong>
-              {{
-                appointment.patientDetails.healthDetails?.medicalConditions
-                  ?.length
-                  ? appointment.patientDetails.healthDetails.medicalConditions.join(
-                      ", "
-                    )
-                  : "None"
-              }}
-            </p>
-          </ng-container>
-        </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<button class="back-btn" (click)="goBack()">Back to Dashboard</button>
+<div class="appointments-container">
+  <h2>My Appointments</h2>
+
+  <table *ngIf="appointments.length > 0; else noAppointments">
+    <thead>
+      <tr>
+        <th>Patient Name</th>
+        <th>Patient Email</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let appointment of appointments">
+        <td>{{ appointment.patientDetails?.name || "Unknown" }}</td>
+        <td>{{ appointment.patientEmail }}</td>
+        <td>{{ appointment.date }}</td>
+        <td>{{ appointment.time }}</td>
+        <td>{{ appointment.status }}</td>
+        <td>
+          <button
+            *ngIf="
+              appointment.status !== 'Finished' &&
+              appointment.status !== 'Canceled'
+            "
+            (click)="markAsFinished(appointment._id)"
+          >
+            Completed
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #noAppointments>
+    <p>No appointments found.</p>
+  </ng-template>
+
+  <button class="back-button" (click)="goBack()">Back</button>
+</div>

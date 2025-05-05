@@ -124,8 +124,8 @@
             <p>Height [M]</p>
           </div>
           <div class="detail">
-            <p>{{ currentVitals.weight || "47" }}</p>
-            <p>Weight Kg</p>
+            <p>{{ currentVitals.weight || "47" }} Kg</p>
+            <p>Weight</p>
           </div>
         </div>
         <div class="weight-trend">
@@ -407,6 +407,74 @@
           <span>25</span>
           <span>30</span>
         </div>
+      </div>
+
+      <!-- Upcoming Appointments Section -->
+      <div class="appointments-section">
+        <h2>Upcoming Appointments</h2>
+        <table
+          mat-table
+          [dataSource]="upcomingAppointments"
+          class="appointment-table"
+        >
+          <!-- Doctor Column -->
+          <ng-container matColumnDef="doctor">
+            <th mat-header-cell *matHeaderCellDef>Doctor</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.doctorId?.name || "N/A" }}
+            </td>
+          </ng-container>
+
+          <!-- Specialty Column -->
+          <ng-container matColumnDef="specialty">
+            <th mat-header-cell *matHeaderCellDef>Specialty</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.doctorId?.specialty || "N/A" }}
+            </td>
+          </ng-container>
+
+          <!-- Date Column -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.date | date : "mediumDate" }}
+            </td>
+          </ng-container>
+
+          <!-- Time Column -->
+          <ng-container matColumnDef="time">
+            <th mat-header-cell *matHeaderCellDef>Time</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.time }}
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.status }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let appointment">
+              <button mat-icon-button color="primary" disabled>
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+          <!-- No Data Row -->
+          <tr class="mat-row" *ngIf="upcomingAppointments.length === 0">
+            <td class="mat-cell" colspan="6">No upcoming appointments</td>
+          </tr>
+        </table>
       </div>
     </div>
 

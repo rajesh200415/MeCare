@@ -168,6 +168,11 @@ io.on("connection", (socket) => {
     console.log(`Socket ${socket.id} joined room: ${doctorEmail}`);
   });
 
+  socket.on("joinPatientRoom", (patientEmail) => {
+    socket.join(patientEmail);
+    console.log(`Socket ${socket.id} joined room: ${patientEmail}`);
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
   });
@@ -256,14 +261,14 @@ const seedTestData = async () => {
     await patient.save();
     console.log("Seeded test patient:", patient);
 
-    // Seed a test appointment (Completed status for feedback testing)
+    // Seed a test appointment (Pending status for testing completion)
     const appointment = new Appointment({
       doctorId: doctor._id,
       patientEmail: patient.email,
       patientName: patient.name,
       date: "2025-05-01",
       time: "10:00",
-      status: "Completed",
+      status: "Pending",
       queuePosition: 0,
     });
     await appointment.save();
@@ -804,19 +809,39 @@ app.put("/api/appointments/:id", async (req, res) => {
   try {
     const { doctorId, patientEmail, patientName, date, time, status } =
       req.body;
-    const appointment = await Appointment.findByIdAndUpdate(
-      req.params.id,
-      { doctorId, patientEmail, patientName, date, time, status },
-      { new: true }
-    );
-    if (!appointment)
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) {
       return res.status(404).json({ message: "Appointment not found" });
-    res.json({ message: "Appointment rescheduled successfully", appointment });
+    }
+
+    // Update the appointment fields
+    appointment.doctorId = doctorId || appointment.doctorId;
+    appointment.patientEmail = patientEmail || appointment.patientEmail;
+    appointment.patientName = patientName || appointment.patientName;
+    appointment.date = date || appointment.date;
+    appointment.time = time || appointment.time;
+    appointment.status = status || appointment.status;
+
+    await appointment.save();
+
+    // Populate the doctorId field in the response
+    await appointment.populate("doctorId", "name specialty email");
+
+    // Emit real-time update to the patient if status changed to "Completed"
+    if (status === "Completed") {
+      io.to(appointment.patientEmail).emit("appointmentStatusUpdated", {
+        appointmentId: appointment._id,
+        status: appointment.status,
+      });
+      console.log(
+        `Notified patient ${appointment.patientEmail}: Appointment status updated to ${appointment.status}`
+      );
+    }
+
+    res.json({ message: "Appointment updated successfully", appointment });
   } catch (error) {
     console.error("Update appointment error:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to reschedule appointment", error });
+    res.status(500).json({ message: "Failed to update appointment", error });
   }
 });
 

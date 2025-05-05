@@ -34,6 +34,8 @@ export class AppointmentsComponent implements OnInit {
 
   patientEmail: string = localStorage.getItem('userEmail') || '';
   patientName: string = localStorage.getItem('userName') || '';
+  errorMessage: string = '';
+  minDate: Date; // Added to restrict past dates
 
   constructor(
     private http: HttpClient,
@@ -45,6 +47,10 @@ export class AppointmentsComponent implements OnInit {
       date: ['', Validators.required],
       time: ['', Validators.required],
     });
+
+    // Set the minimum date to today
+    this.minDate = new Date();
+    this.minDate.setHours(0, 0, 0, 0); // Start of today
   }
 
   ngOnInit(): void {
@@ -103,9 +109,32 @@ export class AppointmentsComponent implements OnInit {
       );
   }
 
+  checkForConflictingAppointments(date: string, time: string): boolean {
+    return this.upcomingAppointments.some((appointment) => {
+      return appointment.date === date && appointment.time === time;
+    });
+  }
+
   onSubmit(): void {
     if (this.appointmentForm.valid) {
       const formData = this.appointmentForm.value;
+      // Format the date to YYYY-MM-DD string
+      const formattedDate = formData.date
+        ? new Date(formData.date).toISOString().split('T')[0]
+        : '';
+
+      // Check for conflicting appointments
+      const hasConflict = this.checkForConflictingAppointments(
+        formattedDate,
+        formData.time
+      );
+      if (hasConflict) {
+        this.errorMessage = `You already have an appointment on ${formattedDate} at ${formData.time}. Please choose a different date or time slot.`;
+        return;
+      }
+
+      this.errorMessage = '';
+
       const selectedDoctor = this.doctors.find(
         (d) => d._id === formData.doctor
       );
@@ -115,7 +144,7 @@ export class AppointmentsComponent implements OnInit {
           doctorId: selectedDoctor._id,
           patientEmail: this.patientEmail,
           patientName: this.patientName,
-          date: formData.date,
+          date: formattedDate,
           time: formData.time,
           status: 'Pending',
         };
@@ -137,6 +166,8 @@ export class AppointmentsComponent implements OnInit {
             },
             (error) => {
               console.error('Error booking appointment:', error);
+              this.errorMessage =
+                'Failed to book appointment. Please try again.';
             }
           );
       }

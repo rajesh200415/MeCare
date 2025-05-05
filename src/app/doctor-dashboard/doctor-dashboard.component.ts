@@ -35,6 +35,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   activityChart: any;
   ageChart: any;
   private socket: Socket;
+  feedbacks: any[] = []; // Store feedback data
+  showFeedbackSection: boolean = false; // Toggle feedback section visibility
 
   constructor(
     private http: HttpClient,
@@ -70,6 +72,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     }
     this.fetchDoctorInfo();
     this.fetchDashboardData();
+    this.fetchFeedback(); // Fetch feedback data on component initialization
     this.setupSocketListeners();
   }
 
@@ -120,6 +123,25 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
           this.errorMessage = 'Failed to fetch dashboard data.';
         }
       );
+  }
+
+  fetchFeedback() {
+    this.http
+      .get<any[]>(`http://localhost:3000/api/feedback/doctor/${this.userEmail}`)
+      .subscribe(
+        (data) => {
+          this.feedbacks = data;
+          console.log('Fetched feedback:', this.feedbacks);
+        },
+        (error) => {
+          console.error('Error fetching feedback:', error);
+          this.errorMessage = 'Failed to load feedback.';
+        }
+      );
+  }
+
+  toggleFeedbackSection() {
+    this.showFeedbackSection = !this.showFeedbackSection;
   }
 
   initializeCharts() {

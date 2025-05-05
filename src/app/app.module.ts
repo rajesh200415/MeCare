@@ -13,7 +13,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatRadioModule } from '@angular/material/radio'; // Add this import
+import { MatRadioModule } from '@angular/material/radio';
+import { MatDatepickerModule } from '@angular/material/datepicker'; // Added
+import { MatNativeDateModule } from '@angular/material/core'; // Added
 import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
@@ -90,7 +92,9 @@ import { DoctorPrescriptionsComponent } from './doctor-prescriptions/doctor-pres
     MatListModule,
     MatDividerModule,
     MatTooltipModule,
-    MatRadioModule, // Add this
+    MatRadioModule,
+    MatDatepickerModule, // Added
+    MatNativeDateModule, // Added
     AppRoutingModule,
   ],
   bootstrap: [AppComponent],

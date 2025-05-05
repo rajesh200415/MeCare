@@ -21,8 +21,9 @@
       >
         <i class="fas fa-prescription-bottle"></i> Prescriptions
       </button>
-      <button class="nav-button" [routerLink]="['/feedback']">
-        <i class="fas fa-comment"></i> Feedback
+      <button class="nav-button" (click)="toggleFeedbackSection()">
+        <i class="fas fa-comment"></i>
+        {{ showFeedbackSection ? "Hide Feedback" : "Feedback" }}
       </button>
       <button class="nav-button" [routerLink]="['/test']">
         <i class="fas fa-flask"></i> Test
@@ -116,6 +117,44 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Feedback Section -->
+    <div *ngIf="showFeedbackSection" class="feedback-section">
+      <h3>Patient Feedback</h3>
+      <table *ngIf="feedbacks.length > 0; else noFeedback">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Appointment Date</th>
+            <th>Appointment Time</th>
+            <th>Communication</th>
+            <th>Professionalism</th>
+            <th>Knowledge</th>
+            <th>Empathy</th>
+            <th>Overall Satisfaction</th>
+            <th>Comments</th>
+            <th>Average Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let feedback of feedbacks">
+            <td>{{ feedback.patientDetails.name || "Unknown" }}</td>
+            <td>{{ feedback.appointmentId?.date || "N/A" }}</td>
+            <td>{{ feedback.appointmentId?.time || "N/A" }}</td>
+            <td>{{ feedback.communication }}</td>
+            <td>{{ feedback.professionalism }}</td>
+            <td>{{ feedback.knowledge }}</td>
+            <td>{{ feedback.empathy }}</td>
+            <td>{{ feedback.overallSatisfaction }}</td>
+            <td>{{ feedback.comments || "No comments" }}</td>
+            <td>{{ feedback.rating.toFixed(1) }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noFeedback>
+        <p>No feedback available.</p>
+      </ng-template>
     </div>
   </div>
 </div>

@@ -100,7 +100,8 @@ nav ul li a.active {
 .yearly-activity-section,
 .health-metrics-section,
 .weekly-activity-section,
-.monthly-activity-section {
+.monthly-activity-section,
+.appointments-section {
   background: #ffffff;
   padding: 24px;
   border-radius: 16px;
@@ -110,14 +111,16 @@ nav ul li a.active {
 
 .health-tips-section:hover,
 .patient-info-section:hover,
-.yearly-activity-section:hover {
+.yearly-activity-section:hover,
+.appointments-section:hover {
   transform: translateY(-5px);
 }
 
 .health-tips-section h2,
 .yearly-activity-section h2,
 .weekly-activity-section h2,
-.monthly-activity-section h2 {
+.monthly-activity-section h2,
+.appointments-section h2 {
   font-size: 20px;
   color: #1e3a8a;
   margin-bottom: 15px;
@@ -338,6 +341,35 @@ button[mat-icon-button]:hover {
   margin-left: 90px;
 }
 
+/* Appointments Table */
+.appointment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th.mat-header-cell,
+td.mat-cell {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e5ec;
+  font-size: 14px;
+  color: #37474f;
+}
+
+th.mat-header-cell {
+  background-color: #f1f8ff;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+td.mat-cell {
+  background-color: #ffffff;
+}
+
+tr.mat-row:hover {
+  background-color: #f1f5f9;
+}
+
 /* Floating Widgets */
 .floating-widgets {
   position: fixed;
@@ -387,5 +419,10 @@ button[mat-icon-button]:hover {
   .patient-details {
     flex-direction: column;
     gap: 15px;
+  }
+
+  .appointment-table {
+    display: block;
+    overflow-x: auto;
   }
 }

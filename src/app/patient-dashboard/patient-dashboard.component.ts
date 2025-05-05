@@ -9,6 +9,8 @@ import {
   animate,
 } from '@angular/animations';
 import Chart from 'chart.js/auto';
+import { SocketService } from '../services/socket.service'; // Import SocketService
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-patient-dashboard',
@@ -41,6 +43,17 @@ export class PatientDashboardComponent implements OnInit, OnDestroy {
   buttonStates: Map<string, string> = new Map();
   activityChart: Chart | undefined;
   monthlyActivityChart: Chart | undefined;
+  upcomingAppointments: any[] = []; // Added for appointments
+  pastAppointments: any[] = []; // Added for appointments
+  displayedColumns: string[] = [
+    'doctor',
+    'specialty',
+    'date',
+    'time',
+    'status',
+    'actions',
+  ]; // Added for table display
+  private socketSubscription: Subscription | undefined; // Added for Socket.IO subscription
 
   healthTips: string[] = [
     'Drink at least 8 glasses of water daily to stay hydrated.',
@@ -53,7 +66,11 @@ export class PatientDashboardComponent implements OnInit, OnDestroy {
   ];
   currentTipIndex: number = 0;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private socketService: SocketService // Inject SocketService
+  ) {}
 
   ngOnInit() {
     console.log('ngOnInit - userEmail:', this.userEmail);
@@ -64,12 +81,27 @@ export class PatientDashboardComponent implements OnInit, OnDestroy {
       return;
     }
     this.fetchPatientData();
+    this.fetchAppointments(); // Fetch appointments on initialization
     setTimeout(() => this.initializeCharts(), 500);
+
+    // Join the patient's Socket.IO room
+    this.socketService.joinRoom(this.userEmail);
+
+    // Listen for appointment status updates
+    this.socketSubscription = this.socketService
+      .onAppointmentStatusUpdated()
+      .subscribe((data) => {
+        console.log('Appointment status updated:', data);
+        this.fetchAppointments(); // Refresh the appointment list
+      });
   }
 
   ngOnDestroy() {
     if (this.activityChart) this.activityChart.destroy();
     if (this.monthlyActivityChart) this.monthlyActivityChart.destroy();
+    // Unsubscribe from the socket event and disconnect
+    this.socketSubscription?.unsubscribe();
+    this.socketService.disconnect();
   }
 
   fetchPatientData() {
@@ -105,6 +137,37 @@ export class PatientDashboardComponent implements OnInit, OnDestroy {
             waterIntake: 73,
             steps: 6500,
           };
+        }
+      );
+  }
+
+  fetchAppointments(): void {
+    this.http
+      .get<any[]>(
+        `http://localhost:3000/api/appointments/patient/${this.userEmail}`
+      )
+      .subscribe(
+        (appointments) => {
+          const currentDate = new Date();
+          this.upcomingAppointments = appointments.filter(
+            (a) =>
+              new Date(a.date) >= currentDate &&
+              a.status !== 'Canceled' &&
+              a.status !== 'Rejected' &&
+              a.status !== 'Completed'
+          );
+          this.pastAppointments = appointments.filter(
+            (a) =>
+              new Date(a.date) < currentDate ||
+              a.status === 'Canceled' ||
+              a.status === 'Rejected' ||
+              a.status === 'Completed'
+          );
+          console.log('Upcoming:', this.upcomingAppointments);
+          console.log('Past:', this.pastAppointments);
+        },
+        (error) => {
+          console.error('Failed to load appointments:', error);
         }
       );
   }
